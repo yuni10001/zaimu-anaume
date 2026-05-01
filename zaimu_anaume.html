@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="財務諸表論">
+<title>財務諸表論 穴埋め100問</title>
+
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --text: #1a1814;
+  --text2: #6b6760;
+  --text3: #9c9890;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --accent: #2d5a3d;
+  --accent-bg: #e8f2eb;
+  --accent-text: #1a3d26;
+  --purple-bg: #eeedfe; --purple-text: #3c3489;
+  --teal-bg: #e1f5ee; --teal-text: #085041;
+  --coral-bg: #faece7; --coral-text: #712b13;
+  --blue-bg: #e6f1fb; --blue-text: #0c447c;
+  --amber-bg: #faeeda; --amber-text: #633806;
+  --green-bg: #eaf3de; --green-text: #27500a;
+  --radius: 14px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141210;
+    --surface: #1e1c19;
+    --surface2: #262420;
+    --text: #f0ede8;
+    --text2: #9c9890;
+    --text3: #6b6760;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --accent: #5a9e72;
+    --accent-bg: #1a2e20;
+    --accent-text: #8fd4a8;
+    --purple-bg: #26215c; --purple-text: #cecbf6;
+    --teal-bg: #04342c; --teal-text: #9fe1cb;
+    --coral-bg: #4a1b0c; --coral-text: #f5c4b3;
+    --blue-bg: #042c53; --blue-text: #b5d4f4;
+    --amber-bg: #412402; --amber-text: #fac775;
+    --green-bg: #173404; --green-text: #c0dd97;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(var(--safe-bottom) + 80px);
+}
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.app-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.progress-wrap { display: flex; align-items: center; gap: 10px; }
+.progress-text { font-size: 13px; color: var(--text2); }
+.progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+.cats { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.cats::-webkit-scrollbar { display: none; }
+.cat-btn {
+  flex-shrink: 0;
+  font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cat-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 500;
+}
+.stats-row {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+}
+.stat-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  flex: 1;
+  text-align: center;
+}
+.stat-num { font-size: 20px; font-weight: 700; }
+.stat-label { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.q-list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: border-color 0.15s;
+}
+.q-card.revealed { border-color: var(--accent); }
+.q-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.q-num { font-size: 11px; color: var(--text3); }
+.badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.b-purple { background: var(--purple-bg); color: var(--purple-text); }
+.b-teal   { background: var(--teal-bg);   color: var(--teal-text); }
+.b-coral  { background: var(--coral-bg);  color: var(--coral-text); }
+.b-blue   { background: var(--blue-bg);   color: var(--blue-text); }
+.b-amber  { background: var(--amber-bg);  color: var(--amber-text); }
+.b-green  { background: var(--green-bg);  color: var(--green-text); }
+.q-text { font-size: 14px; line-height: 1.8; }
+.blank {
+  display: inline-block;
+  min-width: 90px;
+  background: var(--surface2);
+  border-bottom: 2px solid var(--border2);
+  border-radius: 3px;
+  padding: 1px 6px;
+  cursor: pointer;
+  color: transparent;
+  user-select: none;
+  transition: all 0.2s;
+  vertical-align: bottom;
+}
+.blank.on {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 500;
+}
+.q-hint { font-size: 12px; color: var(--text3); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+.page-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 4px;
+}
+.action-btn {
+  flex: 1;
+  font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  font-size: 13px;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+}
+.action-btn:active { opacity: 0.7; }
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px 20px calc(var(--safe-bottom) + 10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 100;
+}
+.nav-btn {
+  font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+}
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.nav-btn:active:not(:disabled) { transform: scale(0.97); }
+.page-indicator { font-size: 13px; color: var(--text2); }
+.install-hint {
+  margin: 12px 16px;
+  background: var(--accent-bg);
+  border: 1px solid rgba(45,90,61,0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--accent-text);
+  line-height: 1.6;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.hint-icon { font-size: 16px; flex-shrink: 0; }
+#install-hint { transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <span class="app-title">📊 財務諸表論 穴埋め</span>
+    <span class="progress-text" id="prog-text">0 / 100</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="cats" style="margin-top:10px;" id="cat-row"></div>
+</div>
+
+<div id="install-hint" class="install-hint">
+  <span class="hint-icon">📲</span>
+  <span>Safariで開いて「共有」→「ホーム画面に追加」でアプリとして使えます</span>
+</div>
+
+<div class="stats-row">
+  <div class="stat-pill"><div class="stat-num" id="s-total">100</div><div class="stat-label">全問</div></div>
+  <div class="stat-pill"><div class="stat-num" id="s-show">10</div><div class="stat-label">表示中</div></div>
+  <div class="stat-pill"><div class="stat-num" id="s-done">0</div><div class="stat-label">回答済</div></div>
+</div>
+
+<div class="page-actions">
+  <button class="action-btn" onclick="revealPage()">このページを表示</button>
+  <button class="action-btn" onclick="hidePage()">隠す</button>
+</div>
+
+<div class="q-list" id="q-list"></div>
+
+<div class="bottom-nav">
+  <button class="nav-btn" id="prev-btn" onclick="goPage(-1)">← 前へ</button>
+  <span class="page-indicator" id="page-ind">1 / 10</span>
+  <button class="nav-btn" id="next-btn" onclick="goPage(1)">次へ →</button>
+</div>
+
+<script>
+const Q = [
+  {c:"概念F",b:"b-purple",t:"財務諸表の目的は、投資家・債権者等の意思決定に有用な【　】を提供することである。",a:"情報",h:"会計の目的の基本"},
+  {c:"概念F",b:"b-purple",t:"一般目的財務報告の主要な利用者は【　】と債権者である。",a:"現在・将来の投資家",h:"IASB概念フレームワーク"},
+  {c:"概念F",b:"b-purple",t:"財務情報の基本的質的特性は【　】と忠実な表現の2つである。",a:"目的適合性",h:"IASB基本概念"},
+  {c:"概念F",b:"b-purple",t:"忠実な表現の特性として、完全性・中立性・【　】が挙げられる。",a:"誤りのないこと",h:"忠実な表現の3要素"},
+  {c:"概念F",b:"b-purple",t:"補強的質的特性の一つ【　】とは、財務情報を期間比較できる性質をいう。",a:"比較可能性",h:"補強的質的特性"},
+  {c:"概念F",b:"b-purple",t:"補強的質的特性のうち【　】とは、財務情報が検証できることをいう。",a:"検証可能性",h:"補強的質的特性"},
+  {c:"概念F",b:"b-purple",t:"財務報告の基礎となる仮定として【　】の前提がある（企業が将来も継続して存在するという前提）。",a:"継続企業（ゴーイング・コンサーン）",h:"会計の基礎的仮定"},
+  {c:"概念F",b:"b-purple",t:"会計期間を区切って損益を計算する慣行を【　】の原則という。",a:"期間損益計算",h:"会計期間の仮定"},
+  {c:"概念F",b:"b-purple",t:"企業の経済活動を貨幣単位で測定・記録する仮定を【　】の仮定という。",a:"貨幣的測定",h:"会計の基礎"},
+  {c:"概念F",b:"b-purple",t:"資本取引と損益取引を混同してはならないとする原則を【　】の原則という。",a:"資本取引・損益取引区別",h:"会計原則の基本"},
+  {c:"概念F",b:"b-purple",t:"会計情報の質的特性のうち【　】とは、情報が意思決定者に理解できる形式で提供されることをいう。",a:"理解可能性",h:"補強的質的特性"},
+  {c:"概念F",b:"b-purple",t:"重要性の原則とは、【　】な項目について厳格な会計処理を省略できるというものである。",a:"金額的に重要でない",h:"重要性の原則"},
+  {c:"概念F",b:"b-purple",t:"保守主義の原則とは、不確実な状況では【　】を避けるため資産・収益を過大計上しないことをいう。",a:"損失の過小評価",h:"保守主義"},
+  {c:"概念F",b:"b-purple",t:"企業会計原則における「真実性の原則」とは、財政状態・経営成績に関する【　】を示すことを要請する原則である。",a:"真実な情報",h:"企業会計原則"},
+  {c:"概念F",b:"b-purple",t:"企業会計原則における「明瞭性の原則」とは、利害関係者に対して企業の状況を【　】に表示することを要請する。",a:"明瞭",h:"企業会計原則"},
+  {c:"資産・負債",b:"b-teal",t:"資産の定義は「過去の取引・事象の結果、企業が支配する、将来の【　】をもたらすことが期待される経済的資源」である。",a:"経済的便益",h:"資産の定義"},
+  {c:"資産・負債",b:"b-teal",t:"負債の定義は「過去の取引・事象から生じた、企業の【　】上の義務」である。",a:"現在",h:"負債の定義"},
+  {c:"資産・負債",b:"b-teal",t:"資産は流動資産と【　】に分類される。",a:"固定資産",h:"資産の分類"},
+  {c:"資産・負債",b:"b-teal",t:"流動資産と固定資産を区分する基準の一つが【　】基準（1年以内に換金されるかどうか）である。",a:"一年",h:"流動・固定分類基準"},
+  {c:"資産・負債",b:"b-teal",t:"固定資産のうち土地や建物などを【　】資産、特許権のような権利を無形固定資産という。",a:"有形固定",h:"固定資産の分類"},
+  {c:"資産・負債",b:"b-teal",t:"有形固定資産に対して、使用や時間の経過による価値減少を配分する手続きを【　】という。",a:"減価償却",h:"固定資産の処理"},
+  {c:"資産・負債",b:"b-teal",t:"定額法の減価償却費＝（取得原価－【　】）÷ 耐用年数",a:"残存価額",h:"定額法の計算式"},
+  {c:"資産・負債",b:"b-teal",t:"棚卸資産の評価において、最後に仕入れたものから先に払い出すと仮定する方法を【　】法という。",a:"後入先出（LIFO）",h:"棚卸資産評価"},
+  {c:"資産・負債",b:"b-teal",t:"棚卸資産の評価において、取得原価と正味実現可能価額のうち【　】で評価するのが低価法である。",a:"いずれか低い価額",h:"低価法の定義"},
+  {c:"資産・負債",b:"b-teal",t:"売買目的有価証券は【　】価額で評価し、評価差額は当期の損益とする。",a:"時価（公正価値）",h:"有価証券評価"},
+  {c:"資産・負債",b:"b-teal",t:"満期保有目的の債券は原則として【　】法で評価する。",a:"償却原価",h:"債券の評価"},
+  {c:"資産・負債",b:"b-teal",t:"負債は流動負債と【　】負債に分類される。",a:"固定",h:"負債の分類"},
+  {c:"資産・負債",b:"b-teal",t:"退職給付引当金は将来の退職給付に備えて設定される【　】の一つである。",a:"引当金",h:"引当金の種類"},
+  {c:"資産・負債",b:"b-teal",t:"引当金を計上するための要件の一つは「当該事象が【　】に生じていること」である。",a:"過去",h:"引当金の計上要件"},
+  {c:"資産・負債",b:"b-teal",t:"資産の帳簿価額が回収可能価額を下回る場合に帳簿価額を切り下げる手続きを【　】という。",a:"減損処理",h:"固定資産の減損"},
+  {c:"資産・負債",b:"b-teal",t:"研究費は発生時に費用処理するが、開発費は一定要件を満たした場合に【　】として資産計上できる（IFRS）。",a:"無形資産",h:"研究開発費の処理"},
+  {c:"資産・負債",b:"b-teal",t:"有形固定資産の取得原価には購入価額のほか【　】費用（設置費・搬入費等）も含まれる。",a:"付随",h:"取得原価の範囲"},
+  {c:"資産・負債",b:"b-teal",t:"損失評価引当金（貸倒引当金）は期末の債権残高に予想【　】率を乗じて設定する。",a:"貸倒（損失）",h:"引当金の計算"},
+  {c:"収益・費用",b:"b-coral",t:"収益認識の原則として、財またはサービスの支配が顧客に移転した時点で収益を認識する【　】基準がある。",a:"支配移転（履行義務充足時）",h:"IFRS15"},
+  {c:"収益・費用",b:"b-coral",t:"収益認識の5ステップ・第1ステップは「顧客との【　】を識別する」ことである。",a:"契約",h:"収益認識5ステップ"},
+  {c:"収益・費用",b:"b-coral",t:"収益認識の5ステップ・第2ステップは「【　】を識別する」ことである。",a:"履行義務",h:"収益認識5ステップ"},
+  {c:"収益・費用",b:"b-coral",t:"収益認識の5ステップ・第3ステップは「【　】価格を算定する」ことである。",a:"取引",h:"収益認識5ステップ"},
+  {c:"収益・費用",b:"b-coral",t:"収益認識の5ステップ・第4ステップは「取引価格を【　】に配分する」ことである。",a:"履行義務",h:"収益認識5ステップ"},
+  {c:"収益・費用",b:"b-coral",t:"収益認識の5ステップ・第5ステップは「各履行義務の充足時に【　】を認識する」ことである。",a:"収益",h:"収益認識5ステップ"},
+  {c:"収益・費用",b:"b-coral",t:"費用の認識基準として、費用と収益の対応関係に基づく【　】の原則がある。",a:"費用収益対応",h:"費用認識の原則"},
+  {c:"収益・費用",b:"b-coral",t:"商品売上原価は売上収益と【　】対応させる（個別的対応）。",a:"直接",h:"費用対応の種類"},
+  {c:"収益・費用",b:"b-coral",t:"販売費及び一般管理費は売上収益と【　】対応させる（期間的対応）。",a:"間接",h:"費用対応の種類"},
+  {c:"収益・費用",b:"b-coral",t:"当期に発生した費用で次期以降の収益に対応するものを【　】として翌期以降に繰り延べる。",a:"前払費用（繰延費用）",h:"費用の繰延"},
+  {c:"収益・費用",b:"b-coral",t:"当期に帰属する費用で未払いのものは【　】として計上する。",a:"未払費用",h:"見越計上"},
+  {c:"収益・費用",b:"b-coral",t:"建設業など長期にわたる契約では【　】基準（進捗度に応じた収益認識）が適用される。",a:"工事進行（一定期間にわたる充足）",h:"長期請負工事"},
+  {c:"収益・費用",b:"b-coral",t:"変動対価とは、対価が変動する場合（値引き・返金・【　】等）の部分をいう。",a:"業績連動ボーナス（リベート）",h:"変動対価"},
+  {c:"収益・費用",b:"b-coral",t:"代理人（エージェント）は顧客から受け取る手数料部分のみを収益として【　】表示する。",a:"純額",h:"本人・代理人の区別"},
+  {c:"収益・費用",b:"b-coral",t:"本人（プリンシパル）は財・サービスの提供対価の【　】を収益として認識する。",a:"総額",h:"本人・代理人の区別"},
+  {c:"財務諸表",b:"b-blue",t:"財務諸表の基本的構成要素は、貸借対照表・損益計算書・【　】・注記の4つ（IFRSベース）。",a:"キャッシュ・フロー計算書",h:"財務諸表の構成"},
+  {c:"財務諸表",b:"b-blue",t:"貸借対照表の左側（借方）には【　】が表示される。",a:"資産",h:"B/Sの構造"},
+  {c:"財務諸表",b:"b-blue",t:"貸借対照表の右側（貸方）には負債と【　】が表示される。",a:"純資産（資本）",h:"B/Sの構造"},
+  {c:"財務諸表",b:"b-blue",t:"貸借対照表等式：資産＝負債＋【　】",a:"純資産（資本）",h:"会計等式"},
+  {c:"財務諸表",b:"b-blue",t:"損益計算書において、売上収益から売上原価を差し引いたものを【　】という。",a:"売上総利益（粗利）",h:"損益計算書の段階利益"},
+  {c:"財務諸表",b:"b-blue",t:"売上総利益から販売費及び一般管理費を控除したものが【　】である。",a:"営業利益",h:"段階利益"},
+  {c:"財務諸表",b:"b-blue",t:"営業利益に営業外収益を加算し営業外費用を控除したものが【　】である。",a:"経常利益",h:"段階利益"},
+  {c:"財務諸表",b:"b-blue",t:"経常利益に特別利益を加算し特別損失を控除したものが【　】である。",a:"税引前当期純利益",h:"段階利益"},
+  {c:"財務諸表",b:"b-blue",t:"キャッシュ・フロー計算書は【　】活動・投資活動・財務活動の3区分で構成される。",a:"営業",h:"C/Fの構成"},
+  {c:"財務諸表",b:"b-blue",t:"営業活動によるキャッシュ・フローの表示方法として、直接法と【　】法がある。",a:"間接",h:"CF計算方法"},
+  {c:"財務諸表",b:"b-blue",t:"間接法では当期純利益から始めて、非資金取引（例：【　】）を調整して営業CFを求める。",a:"減価償却費",h:"間接法の調整項目"},
+  {c:"財務諸表",b:"b-blue",t:"株主資本等変動計算書は【　】の変動を表示する財務諸表である。",a:"純資産（自己資本）",h:"財務諸表の種類"},
+  {c:"財務諸表",b:"b-blue",t:"包括利益計算書において、当期純利益と【　】の合計が包括利益となる。",a:"その他の包括利益",h:"包括利益の定義"},
+  {c:"財務諸表",b:"b-blue",t:"財務諸表における【　】とは、財務諸表本体では表示しきれない詳細情報を補足的に開示するものである。",a:"注記（注記事項）",h:"財務諸表の注記"},
+  {c:"財務諸表",b:"b-blue",t:"財務諸表に対する監査で、重要な虚偽表示がない場合に表明されるのが【　】意見である。",a:"無限定適正（無修正）",h:"監査意見の種類"},
+  {c:"財務諸表",b:"b-blue",t:"連結財務諸表において、親会社が子会社を支配しているかどうかの判断基準を【　】モデルという。",a:"支配力（コントロール）",h:"連結の範囲"},
+  {c:"財務諸表",b:"b-blue",t:"持分法適用会社とは、投資会社が【　】%以上20%未満の議決権を保有し重要な影響力を持つ会社をいう。",a:"20",h:"持分法の適用基準"},
+  {c:"測定・認識",b:"b-amber",t:"歴史的原価（取得原価）とは、資産を取得したときに支払った【　】をいう。",a:"対価の金額",h:"測定基礎"},
+  {c:"測定・認識",b:"b-amber",t:"公正価値（時価）とは、算定日において市場参加者間の秩序ある取引で資産を売却できる【　】をいう。",a:"価格（出口価格）",h:"公正価値の定義"},
+  {c:"測定・認識",b:"b-amber",t:"現在価値とは、将来のキャッシュ・フローを適切な割引率で【　】した価値をいう。",a:"現在に割り引いた",h:"測定の概念"},
+  {c:"測定・認識",b:"b-amber",t:"正味実現可能価額とは、見積売価から見積【　】費用等を控除した価額をいう。",a:"販売",h:"棚卸資産評価"},
+  {c:"測定・認識",b:"b-amber",t:"資産の認識要件のうち一つは、将来の経済的便益が企業に流入する可能性が【　】であることである。",a:"高い（probable）",h:"認識要件"},
+  {c:"測定・認識",b:"b-amber",t:"負債の認識のためには、経済的資源が企業から流出する可能性が【　】であることが必要である。",a:"高い（probable）",h:"認識要件"},
+  {c:"測定・認識",b:"b-amber",t:"会計上の見積りが変更された場合、原則として【　】的に処理する（遡及修正しない）。",a:"将来（プロスペクティブ）",h:"会計上の変更"},
+  {c:"測定・認識",b:"b-amber",t:"会計方針の変更は原則として【　】的に処理する（過去の財務諸表を修正再表示）。",a:"遡及（レトロスペクティブ）",h:"会計方針の変更"},
+  {c:"測定・認識",b:"b-amber",t:"過去の財務諸表の誤りを発見した場合は【　】を行い、遡及して修正する。",a:"修正再表示",h:"誤謬の訂正"},
+  {c:"測定・認識",b:"b-amber",t:"資産除去債務とは、有形固定資産の使用により生じる将来の【　】義務を現在価値で測定した負債をいう。",a:"除去（解体・撤去）",h:"資産除去債務"},
+  {c:"測定・認識",b:"b-amber",t:"ヘッジ会計とは、ヘッジ手段とヘッジ対象の【　】を同一期間に認識するための会計処理をいう。",a:"損益（時価変動）",h:"ヘッジ会計"},
+  {c:"測定・認識",b:"b-amber",t:"公正価値の測定において、市場で観察可能なインプット（上場株式の市場価格等）を用いる最上位の区分を【　】という。",a:"レベル1",h:"公正価値ヒエラルキー"},
+  {c:"測定・認識",b:"b-amber",t:"公正価値ヒエラルキーの【　】は、観察不可能なインプットを使用する最も主観的な区分である。",a:"レベル3",h:"公正価値ヒエラルキー"},
+  {c:"その他",b:"b-green",t:"のれんとは、企業結合において取得した識別可能な純資産の公正価値を超える【　】をいう。",a:"取得対価の超過額",h:"のれんの定義"},
+  {c:"その他",b:"b-green",t:"IFRSではのれんを【　】しない（毎年減損テストを行う）。",a:"規則的に償却",h:"のれんの会計処理の違い"},
+  {c:"その他",b:"b-green",t:"日本基準ではのれんを最長【　】年以内で規則的に償却する。",a:"20",h:"日本基準のれん"},
+  {c:"その他",b:"b-green",t:"リース取引のうち資産のリスクと経済的便益のほとんどがリース利用者に移転するものを【　】リースという。",a:"ファイナンス",h:"リースの分類"},
+  {c:"その他",b:"b-green",t:"ファイナンス・リースはリース資産とリース【　】を計上してオンバランス処理する。",a:"負債",h:"リースの会計処理"},
+  {c:"その他",b:"b-green",t:"IFRS16では原則としてすべてのリースを【　】処理する（使用権資産と負債を認識）。",a:"オンバランス",h:"IFRS16の原則"},
+  {c:"その他",b:"b-green",t:"繰延税金資産・負債を認識する会計処理を【　】法という。",a:"資産負債法（税効果会計）",h:"税効果会計"},
+  {c:"その他",b:"b-green",t:"一時差異とは、資産・負債の【　】と税務上の価額との差異をいう。",a:"帳簿価額",h:"一時差異の定義"},
+  {c:"その他",b:"b-green",t:"将来減算一時差異に対して認識される繰延税金【　】は資産として計上される。",a:"資産",h:"繰延税金"},
+  {c:"その他",b:"b-green",t:"将来加算一時差異に対して認識される繰延税金【　】は負債として計上される。",a:"負債",h:"繰延税金"},
+  {c:"その他",b:"b-green",t:"外貨建取引は取引発生時の【　】レートで換算する（原則）。",a:"為替（直物）",h:"外貨換算"},
+  {c:"その他",b:"b-green",t:"棚卸資産の評価において、最初に仕入れたものから先に払い出すと仮定する方法を【　】法という。",a:"先入先出（FIFO）",h:"棚卸資産評価"},
+  {c:"その他",b:"b-green",t:"IFRSを設定する国際機関を【　】という。",a:"IASB（国際会計基準審議会）",h:"会計基準設定機関"},
+  {c:"その他",b:"b-green",t:"日本の会計基準を設定する機関は【　】（ASBJ）である。",a:"企業会計基準委員会",h:"日本の会計基準機関"},
+  {c:"その他",b:"b-green",t:"収益性の指標の一つであるROEは、当期純利益を【　】で割った比率である。",a:"自己資本（純資産）",h:"財務比率"},
+  {c:"その他",b:"b-green",t:"流動比率とは流動資産を【　】で割った比率であり、短期支払能力を示す。",a:"流動負債",h:"流動性分析"},
+  {c:"その他",b:"b-green",t:"企業結合の会計処理方法として、IFRSおよび日本基準ともに採用している方法は【　】法である。",a:"パーチェス（取得）",h:"企業結合の会計"},
+  {c:"その他",b:"b-green",t:"連結財務諸表作成において、親子会社間の内部取引および【　】を消去する必要がある。",a:"債権債務（内部未実現利益）",h:"連結消去仕訳"},
+  {c:"その他",b:"b-green",t:"金融資産のうち、その他の包括利益を通じて公正価値で測定する資産を【　】（FVOCI）という。",a:"FVOCI金融資産",h:"金融商品分類"},
+];
+
+const cats = ['全カテゴリ','概念F','資産・負債','収益・費用','財務諸表','測定・認識','その他'];
+let curCat = '全カテゴリ';
+let curPage = 1;
+const PER = 10;
+let revealed = {};
+
+try {
+  const saved = localStorage.getItem('zaimu_revealed');
+  if (saved) revealed = JSON.parse(saved);
+} catch(e) {}
+
+function save() {
+  try { localStorage.setItem('zaimu_revealed', JSON.stringify(revealed)); } catch(e) {}
+}
+
+function filtered() {
+  if (curCat === '全カテゴリ') return Q;
+  return Q.filter(q => q.c === curCat);
+}
+
+function render() {
+  const list = filtered();
+  const pages = Math.ceil(list.length / PER);
+  curPage = Math.min(curPage, pages);
+  const start = (curPage - 1) * PER;
+  const slice = list.slice(start, start + PER);
+  const totalRev = Object.keys(revealed).filter(k => revealed[k]).length;
+
+  document.getElementById('s-total').textContent = list.length;
+  document.getElementById('s-show').textContent = slice.length;
+  document.getElementById('s-done').textContent = totalRev;
+  document.getElementById('prog-text').textContent = totalRev + ' / ' + Q.length;
+  document.getElementById('prog-fill').style.width = (totalRev / Q.length * 100).toFixed(1) + '%';
+  document.getElementById('page-ind').textContent = curPage + ' / ' + pages;
+  document.getElementById('prev-btn').disabled = curPage <= 1;
+  document.getElementById('next-btn').disabled = curPage >= pages;
+
+  const catRow = document.getElementById('cat-row');
+  catRow.innerHTML = cats.map(c =>
+    `<button class="cat-btn${c===curCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+
+  const ql = document.getElementById('q-list');
+  ql.innerHTML = slice.map((q, i) => {
+    const idx = start + i;
+    const key = 'q' + idx;
+    const on = revealed[key];
+    const blank = `<span class="blank${on?' on':''}" onclick="toggle('${key}',this)">${on ? q.a : '　　　　　'}</span>`;
+    const text = q.t.replace('【　】', blank);
+    return `<div class="q-card${on?' revealed':''}">
+      <div class="q-meta">
+        <span class="q-num">Q${idx+1}</span>
+        <span class="badge ${q.b}">${q.c}</span>
+      </div>
+      <div class="q-text">${text}</div>
+      ${on ? `<div class="q-hint">ヒント: ${q.h}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggle(key, el) {
+  revealed[key] = !revealed[key];
+  save();
+  render();
+}
+
+function setCat(cat) { curCat = cat; curPage = 1; render(); }
+function goPage(d) { curPage += d; render(); window.scrollTo(0,0); }
+
+function revealPage() {
+  const list = filtered();
+  const start = (curPage - 1) * PER;
+  list.slice(start, start + PER).forEach((_, i) => { revealed['q'+(start+i)] = true; });
+  save(); render();
+}
+function hidePage() {
+  const list = filtered();
+  const start = (curPage - 1) * PER;
+  list.slice(start, start + PER).forEach((_, i) => { revealed['q'+(start+i)] = false; });
+  save(); render();
+}
+
+// 初回のみインストールヒントを表示
+try {
+  if (localStorage.getItem('hint_dismissed')) {
+    document.getElementById('install-hint').style.display = 'none';
+  }
+} catch(e) {}
+document.getElementById('install-hint').addEventListener('click', function() {
+  this.style.opacity = '0';
+  setTimeout(() => { this.style.display = 'none'; }, 300);
+  try { localStorage.setItem('hint_dismissed', '1'); } catch(e) {}
+});
+
+render();
+</script>
+</body>
+</html>
