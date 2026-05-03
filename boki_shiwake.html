@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="簿記論仕訳">
+<title>簿記論 仕訳100問</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --text: #1a1814;
+  --text2: #6b6760;
+  --text3: #9c9890;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --accent: #2d5a3d;
+  --accent-bg: #e8f2eb;
+  --accent-text: #1a3d26;
+  --debit: #0c447c;
+  --debit-bg: #e6f1fb;
+  --credit: #712b13;
+  --credit-bg: #faece7;
+  --purple-bg: #eeedfe; --purple-text: #3c3489;
+  --teal-bg: #e1f5ee; --teal-text: #085041;
+  --coral-bg: #faece7; --coral-text: #712b13;
+  --blue-bg: #e6f1fb; --blue-text: #0c447c;
+  --amber-bg: #faeeda; --amber-text: #633806;
+  --green-bg: #eaf3de; --green-text: #27500a;
+  --pink-bg: #fbeaf0; --pink-text: #72243e;
+  --radius: 14px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141210;
+    --surface: #1e1c19;
+    --surface2: #262420;
+    --text: #f0ede8;
+    --text2: #a8a49c;
+    --text3: #6e6a62;
+    --border: rgba(255,255,255,0.1);
+    --border2: rgba(255,255,255,0.18);
+    --accent: #7fc9a0;
+    --accent-bg: #1d3a26;
+    --accent-text: #c8e6d4;
+    --debit: #85b7eb;
+    --debit-bg: #1a3050;
+    --credit: #f0997b;
+    --credit-bg: #4a1b0c;
+    --purple-bg: #2d2870; --purple-text: #cecbf6;
+    --teal-bg: #0f3d35; --teal-text: #9fe1cb;
+    --coral-bg: #5c2515; --coral-text: #f5c4b3;
+    --blue-bg: #163660; --blue-text: #b5d4f4;
+    --amber-bg: #4a2d08; --amber-text: #fac775;
+    --green-bg: #1f3a10; --green-text: #c0dd97;
+    --pink-bg: #5a1f33; --pink-text: #f4c0d1;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); min-height: 100vh; }
+.header { background: var(--surface); padding: 12px 16px 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255,255,255,0.85); }
+@media (prefers-color-scheme: dark) { .header { background: rgba(30,28,25,0.85); } }
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.app-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.progress-text { font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums; }
+.progress-wrap { width: 100%; }
+.progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+.cats { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.cats::-webkit-scrollbar { display: none; }
+.cat-btn { background: var(--surface2); border: none; border-radius: 999px; padding: 5px 12px; font-size: 12px; color: var(--text2); white-space: nowrap; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+.cat-btn.active { background: var(--text); color: var(--surface); font-weight: 500; }
+.install-hint { margin: 12px 16px; background: var(--accent-bg); border: 1px solid rgba(45,90,61,0.2); border-radius: 12px; padding: 10px 14px; font-size: 12px; color: var(--accent-text); line-height: 1.6; display: flex; gap: 8px; align-items: flex-start; }
+.hint-icon { font-size: 16px; flex-shrink: 0; }
+.stats-row { display: flex; gap: 8px; padding: 8px 16px 12px; }
+.stat-pill { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px; text-align: center; }
+.stat-num { font-size: 18px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.page-actions { display: flex; gap: 8px; padding: 0 16px 12px; }
+.action-btn { flex: 1; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; font-size: 13px; color: var(--text); cursor: pointer; font-family: inherit; font-weight: 500; }
+.action-btn:active { background: var(--surface2); }
+.q-list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+.q-card.open { border-color: var(--accent); }
+.q-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.q-num { font-size: 11px; color: var(--text3); font-weight: 500; font-variant-numeric: tabular-nums; }
+.badge { font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+.b-purple { background: var(--purple-bg); color: var(--purple-text); }
+.b-teal { background: var(--teal-bg); color: var(--teal-text); }
+.b-coral { background: var(--coral-bg); color: var(--coral-text); }
+.b-blue { background: var(--blue-bg); color: var(--blue-text); }
+.b-amber { background: var(--amber-bg); color: var(--amber-text); }
+.b-green { background: var(--green-bg); color: var(--green-text); }
+.b-pink { background: var(--pink-bg); color: var(--pink-text); }
+.q-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+.q-answer { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.q-card.open .q-answer { display: block; }
+.shiwake { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.shiwake-side { background: var(--surface2); border-radius: 8px; padding: 8px 10px; }
+.shiwake-label { font-size: 10px; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.5px; }
+.shiwake-label.debit-label { color: var(--debit); }
+.shiwake-label.credit-label { color: var(--credit); }
+.shiwake-line { font-size: 13px; color: var(--text); line-height: 1.6; display: flex; justify-content: space-between; gap: 6px; padding: 1px 0; }
+.shiwake-line .acc { flex: 1; }
+.shiwake-line .amt { font-variant-numeric: tabular-nums; color: var(--text2); }
+.q-hint { font-size: 12px; color: var(--text2); margin-top: 8px; padding: 8px 10px; background: var(--amber-bg); color: var(--amber-text); border-radius: 8px; line-height: 1.5; }
+.bottom-nav { position: sticky; bottom: 0; background: rgba(245,244,240,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 16px calc(10px + var(--safe-bottom)); display: flex; gap: 8px; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 12px; }
+@media (prefers-color-scheme: dark) { .bottom-nav { background: rgba(20,18,16,0.9); } }
+.nav-btn { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 16px; font-size: 13px; color: var(--text); cursor: pointer; font-family: inherit; font-weight: 500; }
+.nav-btn:disabled { opacity: 0.4; }
+.page-indicator { font-size: 13px; color: var(--text2); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <span class="app-title">📓 簿記論 仕訳100問</span>
+    <span class="progress-text" id="prog-text">0 / 100</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="cats" style="margin-top:10px;" id="cat-row"></div>
+</div>
+
+<div id="install-hint" class="install-hint">
+  <span class="hint-icon">📲</span>
+  <span>Safariで開いて「共有」→「ホーム画面に追加」でアプリとして使えます</span>
+</div>
+
+<div class="stats-row">
+  <div class="stat-pill"><div class="stat-num" id="s-total">100</div><div class="stat-label">全問</div></div>
+  <div class="stat-pill"><div class="stat-num" id="s-show">10</div><div class="stat-label">表示中</div></div>
+  <div class="stat-pill"><div class="stat-num" id="s-done">0</div><div class="stat-label">回答済</div></div>
+</div>
+
+<div class="page-actions">
+  <button class="action-btn" onclick="revealPage()">このページを表示</button>
+  <button class="action-btn" onclick="hidePage()">隠す</button>
+</div>
+
+<div class="q-list" id="q-list"></div>
+
+<div class="bottom-nav">
+  <button class="nav-btn" id="prev-btn" onclick="goPage(-1)">← 前へ</button>
+  <span class="page-indicator" id="page-ind">1 / 10</span>
+  <button class="nav-btn" id="next-btn" onclick="goPage(1)">次へ →</button>
+</div>
+
+<script>
+const Q = [
+  // 有価証券（12問）
+  {c:"有価証券",b:"b-blue",t:"その他有価証券（取得原価800,000円、前期末時価850,000円、税効果適用済・実効税率30%）について、当期首の振戻仕訳を示せ。",d:[["繰延税金負債","15,000"],["その他有価証券評価差額金","35,000"]],cr:[["その他有価証券","50,000"]],h:"前期末計上額を逆仕訳"},
+  {c:"有価証券",b:"b-blue",t:"その他有価証券（取得原価1,000,000円）の当期末時価が900,000円となった。実効税率30%として全部純資産直入法により処理せよ。",d:[["繰延税金資産","30,000"],["その他有価証券評価差額金","70,000"]],cr:[["その他有価証券","100,000"]],h:"評価損100,000のうち税効果30,000を控除"},
+  {c:"有価証券",b:"b-blue",t:"売買目的有価証券（帳簿価額500,000円）を時価620,000円で売却し、代金は後日受領することとした。",d:[["未収入金","620,000"]],cr:[["売買目的有価証券","500,000"],["有価証券売却益","120,000"]],h:"売買目的は時価帳簿"},
+  {c:"有価証券",b:"b-blue",t:"満期保有目的債券（額面1,000,000円、取得原価950,000円、満期5年）を当期首に取得した。償却原価法（定額法）により決算整理仕訳を行え。",d:[["満期保有目的債券","10,000"]],cr:[["有価証券利息","10,000"]],h:"50,000÷5年"},
+  {c:"有価証券",b:"b-blue",t:"A社株式（その他有価証券）を1,200,000円で取得していたが、追加取得により子会社となった。追加取得直前の時価1,400,000円、評価差額金140,000円（税効果30%適用済）を振り戻し、子会社株式に振り替える仕訳を示せ。",d:[["繰延税金負債","60,000"],["その他有価証券評価差額金","140,000"],["子会社株式","1,400,000"]],cr:[["その他有価証券","1,400,000"],["その他有価証券","200,000"]],h:"評価差額の振戻＋振替"},
+  {c:"有価証券",b:"b-blue",t:"その他有価証券評価差額金の処理として部分純資産直入法を採用している。取得原価500,000円の株式の期末時価が420,000円となった。実効税率30%。",d:[["投資有価証券評価損","80,000"]],cr:[["その他有価証券","80,000"]],h:"部分純資産直入：評価損は当期費用、税効果は別仕訳"},
+  {c:"有価証券",b:"b-blue",t:"上問の続き。部分純資産直入法における税効果の仕訳を示せ。",d:[["繰延税金資産","24,000"]],cr:[["法人税等調整額","24,000"]],h:"80,000×30%"},
+  {c:"有価証券",b:"b-blue",t:"関連会社株式（取得原価600,000円）の期末時価が著しく下落し150,000円となり、回復見込みがない。強制評価減を行え。",d:[["関係会社株式評価損","450,000"]],cr:[["関連会社株式","450,000"]],h:"50%以上下落で回復見込みなし"},
+  {c:"有価証券",b:"b-blue",t:"額面1,000,000円の社債を980,000円で買入消却した（帳簿価額990,000円）。代金は当座預金より支払。",d:[["社債","990,000"]],cr:[["当座預金","980,000"],["社債償還益","10,000"]],h:"帳簿価額と買入価額の差額"},
+  {c:"有価証券",b:"b-blue",t:"その他有価証券（取得原価300,000円、当期末時価280,000円）について、評価損の30%が損金算入されない。実効税率30%として税効果の仕訳を示せ。",d:[["繰延税金資産","6,000"],["その他有価証券評価差額金","14,000"]],cr:[["その他有価証券","20,000"]],h:"税効果は全額に適用、純資産直入"},
+  {c:"有価証券",b:"b-blue",t:"取得原価800,000円のその他有価証券を時価950,000円で売却した。前期末時価が900,000円で評価差額金70,000円（税効果30%適用済）が計上されている。",d:[["現金預金","950,000"],["繰延税金負債","30,000"],["その他有価証券評価差額金","70,000"]],cr:[["その他有価証券","900,000"],["投資有価証券売却益","150,000"]],h:"振戻＋売却を同時に処理"},
+  {c:"有価証券",b:"b-blue",t:"額面500,000円の国債を額面@98円で取得し、端数利息1,500円とともに小切手を振出して支払った。売買目的。",d:[["売買目的有価証券","490,000"],["有価証券利息","1,500"]],cr:[["当座預金","491,500"]],h:"端数利息は有価証券利息"},
+
+  // 連結・持分法（13問）
+  {c:"連結",b:"b-purple",t:"P社はS社株式の80%を取得時にS社の純資産が資本金500,000円・利益剰余金200,000円のときに700,000円で取得した。投資と資本の相殺消去仕訳を示せ。",d:[["資本金","500,000"],["利益剰余金","200,000"],["のれん","140,000"],["非支配株主持分","140,000"]],cr:[["S社株式","700,000"],["非支配株主持分","140,000"]],h:"のれん＝700,000−700,000×80%"},
+  {c:"連結",b:"b-purple",t:"上問ののれん（残存5年・定額法）の連結第1期末償却仕訳を示せ。",d:[["のれん償却額","28,000"]],cr:[["のれん","28,000"]],h:"140,000÷5年"},
+  {c:"連結",b:"b-purple",t:"S社（80%子会社）が当期純利益150,000円を計上した。非支配株主持分への振替仕訳を示せ。",d:[["非支配株主に帰属する当期純利益","30,000"]],cr:[["非支配株主持分","30,000"]],h:"150,000×20%"},
+  {c:"連結",b:"b-purple",t:"S社（80%子会社）が剰余金の配当50,000円を実施した。連結修正仕訳を示せ。",d:[["受取配当金","40,000"],["非支配株主持分","10,000"]],cr:[["利益剰余金（剰余金の配当）","50,000"]],h:"親会社受取分と非支配持分減少"},
+  {c:"連結",b:"b-purple",t:"P社はS社（100%子会社）に商品600,000円（原価450,000円）を販売した。期末にS社の在庫として200,000円残っている。アップストリーム取引でないとして未実現利益消去の仕訳を示せ。",d:[["売上原価","50,000"]],cr:[["商品","50,000"]],h:"200,000×(150,000/600,000)＝50,000"},
+  {c:"連結",b:"b-purple",t:"上問の税効果の仕訳を示せ。実効税率30%。",d:[["繰延税金資産","15,000"]],cr:[["法人税等調整額","15,000"]],h:"未実現利益消去×30%"},
+  {c:"連結",b:"b-purple",t:"S社（80%）がP社に商品（原価400,000円・売価500,000円）を販売し、P社の期末在庫に150,000円残っている。アップストリーム取引の未実現利益消去仕訳を示せ。",d:[["売上原価","30,000"]],cr:[["商品","30,000"]],h:"150,000×(100,000/500,000)"},
+  {c:"連結",b:"b-purple",t:"上問の非支配株主持分への按分仕訳を示せ（税効果は無視）。",d:[["非支配株主持分","6,000"]],cr:[["非支配株主に帰属する当期純利益","6,000"]],h:"30,000×20%（持分減少を戻す）"},
+  {c:"連結",b:"b-purple",t:"P社はA社株式の30%を400,000円で取得（持分法適用会社）。A社の純資産が1,200,000円のときに取得した。投資差額の処理として、のれん相当額があれば計算しその発生仕訳は不要だが期末に5年で償却する仕訳を示せ。",d:[["持分法による投資損益","8,000"]],cr:[["A社株式","8,000"]],h:"40,000÷5年（のれん相当40,000）"},
+  {c:"連結",b:"b-purple",t:"A社（持分30%、持分法）が当期純利益200,000円を計上した。",d:[["A社株式","60,000"]],cr:[["持分法による投資損益","60,000"]],h:"200,000×30%"},
+  {c:"連結",b:"b-purple",t:"A社（持分30%）から配当金30,000円を受け取った。持分法における修正仕訳を示せ（受取時の仕訳は処理済）。",d:[["受取配当金","9,000"]],cr:[["A社株式","9,000"]],h:"30,000×30%"},
+  {c:"連結",b:"b-purple",t:"P社はS社株式60%を保有。当期に追加で20%を300,000円で取得した。追加取得時のS社資本剰余金は1,200,000円、利益剰余金300,000円、評価差額20,000円。非支配株主持分の減少と差額処理を示せ。",d:[["非支配株主持分","304,000"]],cr:[["S社株式","300,000"],["資本剰余金","4,000"]],h:"1,520,000×20%＝304,000、差額は資本剰余金"},
+  {c:"連結",b:"b-purple",t:"P社はS社株式80%を保有。当期に10%を200,000円で売却（帳簿価額150,000円）。売却時のS社純資産は1,800,000円。個別では売却益50,000円計上済。連結修正仕訳を示せ。",d:[["S社株式売却益","50,000"]],cr:[["非支配株主持分","180,000"],["資本剰余金","△130,000"]],h:"持分減少分を非支配株主持分へ振替"},
+
+  // 棚卸資産・原価計算（10問）
+  {c:"棚卸資産",b:"b-amber",t:"期末商品帳簿棚卸高1,200,000円、実地棚卸高1,150,000円、正味売却価額1,100,000円。棚卸減耗損は売上原価とし、評価損も売上原価とする処理を行え（区分は設けない仕訳）。",d:[["仕入","100,000"]],cr:[["繰越商品","100,000"]],h:"50,000＋50,000"},
+  {c:"棚卸資産",b:"b-amber",t:"上問について、棚卸減耗損と商品評価損を独立科目として計上する場合の仕訳を示せ。",d:[["棚卸減耗損","50,000"],["商品評価損","50,000"]],cr:[["繰越商品","100,000"]],h:"帳簿1,200−実地1,150＝50（減耗）、実地1,150−正味1,100＝50（評価）"},
+  {c:"棚卸資産",b:"b-amber",t:"先入先出法により期末商品評価。期首50個@1,000円、当期仕入100個@1,200円、期末在庫80個。期末商品の評価額を仕訳で示せ（仕入勘定で売上原価を計算する三分法）。",d:[["繰越商品","96,000"]],cr:[["仕入","96,000"]],h:"先入先出法だと期末は当期仕入分80個×1,200"},
+  {c:"棚卸資産",b:"b-amber",t:"商品350,000円を売価400,000円で割賦販売した（回収期間4年）。販売基準により処理する場合の仕訳を示せ。",d:[["割賦売掛金","400,000"]],cr:[["割賦売上","400,000"]],h:"通常の売上計上"},
+  {c:"棚卸資産",b:"b-amber",t:"期末に売価還元法で計算したところ、期末売価300,000円、原価率68%だった。期末商品の繰越仕訳を示せ。",d:[["繰越商品","204,000"]],cr:[["仕入","204,000"]],h:"300,000×0.68"},
+  {c:"棚卸資産",b:"b-amber",t:"原価ベースで計算した期末商品500,000円のうち、品質低下で正味売却価額が350,000円になった商品があり、その帳簿価額は400,000円。商品評価損を計上せよ。",d:[["商品評価損","50,000"]],cr:[["繰越商品","50,000"]],h:"400,000−350,000"},
+  {c:"棚卸資産",b:"b-amber",t:"商品を委託販売した（積送品）。委託品の原価200,000円を発送し、運賃15,000円を現金で支払った。",d:[["積送品","215,000"]],cr:[["仕入","200,000"],["現金","15,000"]],h:"発送諸掛は積送品原価に算入"},
+  {c:"棚卸資産",b:"b-amber",t:"上問の積送品が販売され、受託者から売上計算書（売上高280,000円、手数料15,000円控除後の純額265,000円）が届いた。手取額未収。その都度法。",d:[["積送売掛金","265,000"],["積送諸掛","15,000"]],cr:[["積送品売上","280,000"]],h:"その都度法では総額売上"},
+  {c:"棚卸資産",b:"b-amber",t:"上問の積送品の売上原価計上仕訳を示せ。原価率77.14%（積送品@1,150の販売数240個＝276,000を販売）と仮定。実際には215,000のうち184,286が販売分。",d:[["積送品売上原価","184,286"]],cr:[["積送品","184,286"]],h:"その都度法では販売の都度売上原価計上"},
+  {c:"棚卸資産",b:"b-amber",t:"未着品150,000円を仕入として計上していたが、期末時点で未到着。決算整理で未着品勘定に振替えた。",d:[["未着品","150,000"]],cr:[["仕入","150,000"]],h:"未着品は資産計上"},
+
+  // 固定資産（12問）
+  {c:"固定資産",b:"b-teal",t:"取得原価1,000,000円、減価償却累計額600,000円の備品（直接法ではなく間接法）を150,000円で売却し、代金は翌月受取。",d:[["減価償却累計額","600,000"],["未収入金","150,000"],["固定資産売却損","250,000"]],cr:[["備品","1,000,000"]],h:"帳簿価額400,000＞売却価額150,000"},
+  {c:"固定資産",b:"b-teal",t:"建物（取得原価3,000,000円、減価償却累計額1,800,000円、当期首取得後5年経過、耐用年数30年・定額法）を期首から半年経過時点で除却した。除却資産の処分見込価額は100,000円。",d:[["減価償却累計額","1,800,000"],["減価償却費","50,000"],["貯蔵品","100,000"],["固定資産除却損","1,050,000"]],cr:[["建物","3,000,000"]],h:"期中除却は当期分の減価償却を計上、3,000,000÷30÷2"},
+  {c:"固定資産",b:"b-teal",t:"機械装置（取得原価2,000,000円、残存価額0、耐用年数8年）を200%定率法で償却する第1年度の減価償却費を計上せよ。",d:[["減価償却費","500,000"]],cr:[["機械装置減価償却累計額","500,000"]],h:"償却率＝1/8×200%＝0.25"},
+  {c:"固定資産",b:"b-teal",t:"上問の機械装置を第2年度末に減価償却を計上せよ。",d:[["減価償却費","375,000"]],cr:[["機械装置減価償却累計額","375,000"]],h:"(2,000,000−500,000)×0.25"},
+  {c:"固定資産",b:"b-teal",t:"取得原価800,000円、累計額500,000円の機械を圧縮記帳の対象として国庫補助金300,000円を受領していた。当期に圧縮記帳の積立金方式で積立金を計上せよ（実効税率30%）。",d:[["繰越利益剰余金","210,000"]],cr:[["圧縮積立金","210,000"]],h:"300,000×(1−30%)"},
+  {c:"固定資産",b:"b-teal",t:"上問の税効果仕訳（積立金方式）を示せ。",d:[["法人税等調整額","90,000"]],cr:[["繰延税金負債","90,000"]],h:"300,000×30%"},
+  {c:"固定資産",b:"b-teal",t:"建物を取得し、本体価格5,000,000円、登記費用50,000円、不動産取得税80,000円を小切手で支払った。登記費用は取得原価に含め、不動産取得税は費用処理する方針。",d:[["建物","5,050,000"],["租税公課","80,000"]],cr:[["当座預金","5,130,000"]],h:"付随費用の処理判断"},
+  {c:"固定資産",b:"b-teal",t:"自社利用ソフトウェア（取得原価500,000円、5年定額法）の第3年度末減価償却を行え。",d:[["ソフトウェア償却","100,000"]],cr:[["ソフトウェア","100,000"]],h:"500,000÷5、無形固定資産は直接法"},
+  {c:"固定資産",b:"b-teal",t:"市場販売目的のソフトウェアの当期償却。販売開始時の取得原価1,200,000円、見込販売数量の総数3,000本、当期実績500本、見込有効期間3年。",d:[["ソフトウェア償却","400,000"]],cr:[["ソフトウェア","400,000"]],h:"見込販売数量基準と均等配分のいずれか高い額：500/3,000×1,200,000＝200,000、1,200,000÷3＝400,000"},
+  {c:"固定資産",b:"b-teal",t:"建物（取得原価8,000,000円、減価償却累計額3,000,000円）について減損の兆候があり、割引前将来CF4,500,000円、回収可能価額3,800,000円となった。減損損失を計上せよ。",d:[["減損損失","1,200,000"]],cr:[["建物減損損失累計額","1,200,000"]],h:"帳簿価額5,000,000−回収可能価額3,800,000"},
+  {c:"固定資産",b:"b-teal",t:"資産除去債務。取得原価2,000,000円の機械装置（耐用年数5年）について、除去費用見積額200,000円、割引率3%。取得時の仕訳を示せ（200,000÷1.03^5≒172,521）。",d:[["機械装置","2,172,521"]],cr:[["現金預金","2,000,000"],["資産除去債務","172,521"]],h:"将来除去費用の現在価値を取得原価に算入"},
+  {c:"固定資産",b:"b-teal",t:"上問の決算時。資産除去債務の利息費用と機械装置の減価償却（残存0、5年定額）を仕訳せよ。",d:[["利息費用","5,176"],["減価償却費","434,504"]],cr:[["資産除去債務","5,176"],["機械装置減価償却累計額","434,504"]],h:"172,521×3%≒5,176、2,172,521÷5"},
+
+  // 引当金・退職給付（10問）
+  {c:"引当金",b:"b-coral",t:"売掛金期末残高3,000,000円に対し、貸倒実績率2%で貸倒引当金を設定する。期首残高40,000円。差額補充法。",d:[["貸倒引当金繰入","20,000"]],cr:[["貸倒引当金","20,000"]],h:"60,000−40,000"},
+  {c:"引当金",b:"b-coral",t:"破産更生債権等500,000円について、担保処分見込額100,000円。財務内容評価法により貸倒引当金を計上せよ（個別評価、当期新規）。",d:[["貸倒引当金繰入","400,000"]],cr:[["貸倒引当金","400,000"]],h:"500,000−100,000"},
+  {c:"引当金",b:"b-coral",t:"貸付金1,000,000円（貸倒懸念債権）について、キャッシュ・フロー見積法により評価。元利回収予定毎期100,000円×10年、当初約定利率5%、現在の見積CFを割引いた現在価値772,173円。",d:[["貸倒引当金繰入","227,827"]],cr:[["貸倒引当金","227,827"]],h:"1,000,000−772,173"},
+  {c:"引当金",b:"b-coral",t:"前期末に設定した売上割戻引当金80,000円について、当期に60,000円の割戻を実施し普通預金より支払った。",d:[["売上割戻引当金","60,000"]],cr:[["普通預金","60,000"]],h:"取崩仕訳"},
+  {c:"引当金",b:"b-coral",t:"製品保証引当金。当期売上高20,000,000円、過去の保証費用率0.5%。期首残高40,000円、当期実費30,000円（処理済）。期末設定（差額補充法）。",d:[["製品保証引当金繰入","90,000"]],cr:[["製品保証引当金","90,000"]],h:"100,000−(40,000−30,000)"},
+  {c:"引当金",b:"b-coral",t:"退職給付債務。期首5,000,000円、勤務費用400,000円、利息費用150,000円（割引率3%）、期待運用収益80,000円（年金資産期首2,000,000円）。期末仕訳。",d:[["退職給付費用","470,000"]],cr:[["退職給付引当金","470,000"]],h:"400,000＋150,000−80,000"},
+  {c:"引当金",b:"b-coral",t:"年金掛金300,000円を当座預金より支払った。",d:[["退職給付引当金","300,000"]],cr:[["当座預金","300,000"]],h:"年金資産増加→引当金減少"},
+  {c:"引当金",b:"b-coral",t:"退職金500,000円を退職者に当座預金より支払った（退職給付引当金で処理）。",d:[["退職給付引当金","500,000"]],cr:[["当座預金","500,000"]],h:"内部積立で支給"},
+  {c:"引当金",b:"b-coral",t:"数理計算上の差異（不利差異）500,000円が当期に発生した。10年で定額法償却（当期から）。",d:[["退職給付費用","50,000"]],cr:[["退職給付引当金","50,000"]],h:"500,000÷10年"},
+  {c:"引当金",b:"b-coral",t:"賞与引当金。次回支給見込額600,000円、計算期間6ヶ月のうち当期負担分4ヶ月。期末計上（前期残高なし、洗替法）。",d:[["賞与引当金繰入","400,000"]],cr:[["賞与引当金","400,000"]],h:"600,000×4/6"},
+
+  // 税効果会計（8問）
+  {c:"税効果",b:"b-pink",t:"貸倒引当金の繰入限度超過額150,000円について税効果会計を適用せよ。実効税率30%。",d:[["繰延税金資産","45,000"]],cr:[["法人税等調整額","45,000"]],h:"将来減算一時差異"},
+  {c:"税効果",b:"b-pink",t:"減価償却超過額200,000円について当期に税効果を適用。実効税率30%。",d:[["繰延税金資産","60,000"]],cr:[["法人税等調整額","60,000"]],h:"将来減算"},
+  {c:"税効果",b:"b-pink",t:"上問の翌期に超過額が解消された。税効果の解消仕訳を示せ。",d:[["法人税等調整額","60,000"]],cr:[["繰延税金資産","60,000"]],h:"逆仕訳"},
+  {c:"税効果",b:"b-pink",t:"前期計上の繰延税金資産120,000円について、回収可能性が低下し50,000円分を取り崩した。",d:[["法人税等調整額","50,000"]],cr:[["繰延税金資産","50,000"]],h:"評価性引当額の計上"},
+  {c:"税効果",b:"b-pink",t:"圧縮記帳の積立金方式（積立金200,000円、税効果適用済の繰延税金負債なし）。当期に対応資産の減価償却が20,000円実施されたため、積立金を取り崩す。実効税率30%。",d:[["圧縮積立金","14,000"],["繰延税金負債","6,000"]],cr:[["繰越利益剰余金","14,000"],["法人税等調整額","6,000"]],h:"取崩額20,000×(1−30%)＝14,000"},
+  {c:"税効果",b:"b-pink",t:"その他有価証券評価差額金の税効果。評価益150,000円、実効税率30%。全部純資産直入法。",d:[["その他有価証券","150,000"]],cr:[["繰延税金負債","45,000"],["その他有価証券評価差額金","105,000"]],h:"純資産直入は損益を経由しない"},
+  {c:"税効果",b:"b-pink",t:"連結上の未実現利益消去（売上原価100,000円消去）に対する税効果。実効税率30%。アップストリーム取引で非支配株主持分20%。",d:[["繰延税金資産","30,000"]],cr:[["法人税等調整額","30,000"]],h:"未実現利益消去額×実効税率"},
+  {c:"税効果",b:"b-pink",t:"繰越欠損金300,000円について、回収可能性ありとして税効果を計上。実効税率30%。",d:[["繰延税金資産","90,000"]],cr:[["法人税等調整額","90,000"]],h:"繰越欠損金は将来減算"},
+
+  // 外貨建取引（8問）
+  {c:"外貨建",b:"b-green",t:"米国の取引先より商品$10,000を仕入れた。仕入時の直物為替相場$1=110円。代金は3ヶ月後の支払。",d:[["仕入","1,100,000"]],cr:[["買掛金","1,100,000"]],h:"取引時レートで換算"},
+  {c:"外貨建",b:"b-green",t:"上問の買掛金（$10,000、計上時1,100,000円）について、決済時の直物相場$1=115円。当座預金より支払。",d:[["買掛金","1,100,000"],["為替差損","50,000"]],cr:[["当座預金","1,150,000"]],h:"円安で支払額増加"},
+  {c:"外貨建",b:"b-green",t:"$5,000の売掛金（計上時$1=108円）が期末に未決済。期末相場$1=112円。",d:[["売掛金","20,000"]],cr:[["為替差益","20,000"]],h:"5,000×(112−108)"},
+  {c:"外貨建",b:"b-green",t:"3ヶ月後に決済予定の買掛金$10,000（取引時相場110円）に対し、為替予約を取引時に予約レート@111円で締結（振当処理）。為替予約差額は前払費用と前受収益で処理する。直々差額・直先差額の振分けと前受配分は不要として、買掛金部分の換算替えのみ示せ。",d:[["為替差損","10,000"]],cr:[["買掛金","10,000"]],h:"買掛金を予約レートで再換算（振当処理の簡便な処理）"},
+  {c:"外貨建",b:"b-green",t:"在外子会社の財務諸表の換算で、収益・費用は期中平均レート（@110円）、資産負債は期末レート（@112円）、資本は取得時レート（@108円）を使用した結果、為替換算調整勘定として80,000円の貸方差額が生じた。",d:[["在外子会社株式","80,000"]],cr:[["為替換算調整勘定","80,000"]],h:"純資産の部に直接計上、税効果は別途"},
+  {c:"外貨建",b:"b-green",t:"外貨建の満期保有目的債券（$10,000、取得時@108円、期末@112円）。期末換算仕訳を示せ。",d:[["満期保有目的債券","40,000"]],cr:[["為替差益","40,000"]],h:"金銭債権同様、決算時相場で換算"},
+  {c:"外貨建",b:"b-green",t:"外貨建売買目的有価証券。$5,000を取得（@108円）、期末時価$5,500、期末相場@112円。",d:[["売買目的有価証券","76,000"]],cr:[["有価証券評価益","76,000"]],h:"5,500×112−5,000×108＝76,000"},
+  {c:"外貨建",b:"b-green",t:"外貨建その他有価証券（取得$8,000・@110円、期末時価$8,200・期末相場@115円）。実効税率30%、全部純資産直入法。",d:[["その他有価証券","63,000"]],cr:[["繰延税金負債","18,900"],["その他有価証券評価差額金","44,100"]],h:"8,200×115−8,000×110＝63,000"},
+
+  // リース・社債・特殊（10問）
+  {c:"リース",b:"b-purple",t:"ファイナンスリース取引（所有権移転外）の開始。見積現金購入価額500,000円、リース料総額600,000円（年100,000円×6年）、利子率約6.4%。利子込み法ではなく利子抜き法（原則）で処理。",d:[["リース資産","500,000"]],cr:[["リース債務","500,000"]],h:"見積現金購入価額で計上"},
+  {c:"リース",b:"b-purple",t:"上問のリース料初回支払時。リース料100,000円のうち利息相当額32,000円。",d:[["リース債務","68,000"],["支払利息","32,000"]],cr:[["当座預金","100,000"]],h:"利息法または定額法で配分"},
+  {c:"リース",b:"b-purple",t:"上問のリース資産（残価0、6年）の第1年度減価償却（リース期間定額法）。",d:[["減価償却費","83,333"]],cr:[["リース資産減価償却累計額","83,333"]],h:"500,000÷6"},
+  {c:"リース",b:"b-purple",t:"オペレーティングリース。年間リース料60,000円を当座預金から支払。",d:[["支払リース料","60,000"]],cr:[["当座預金","60,000"]],h:"通常の費用処理"},
+  {c:"リース",b:"b-purple",t:"額面1,000,000円の社債を払込価額@98円、年利率3%、5年満期で発行した。払込金は当座預金。",d:[["当座預金","980,000"]],cr:[["社債","980,000"]],h:"払込金額で社債計上"},
+  {c:"リース",b:"b-purple",t:"上問の社債について、決算時の利息法による償却原価法（実効利子率3.435%）。期首社債帳簿価額980,000円、クーポン30,000円。",d:[["社債利息","33,663"]],cr:[["当座預金","30,000"],["社債","3,663"]],h:"980,000×3.435%＝33,663"},
+  {c:"リース",b:"b-purple",t:"自己株式200株を1株あたり@800円で取得。代金は普通預金より支払、付随費用5,000円も支払。",d:[["自己株式","160,000"],["支払手数料","5,000"]],cr:[["普通預金","165,000"]],h:"付随費用は費用処理"},
+  {c:"リース",b:"b-purple",t:"自己株式（帳簿価額@800円、200株）のうち100株を@900円で処分。",d:[["普通預金","90,000"]],cr:[["自己株式","80,000"],["その他資本剰余金","10,000"]],h:"処分差益はその他資本剰余金"},
+  {c:"リース",b:"b-purple",t:"自己株式（帳簿価額@800円、100株）を@750円で処分。その他資本剰余金残高3,000円。",d:[["普通預金","75,000"],["その他資本剰余金","3,000"],["繰越利益剰余金","2,000"]],cr:[["自己株式","80,000"]],h:"その他資本剰余金不足分は繰越利益剰余金から"},
+  {c:"リース",b:"b-purple",t:"自己株式100株（帳簿価額@800円）を消却した。",d:[["その他資本剰余金","80,000"]],cr:[["自己株式","80,000"]],h:"消却はその他資本剰余金を取崩"},
+
+  // 純資産・本支店等（17問）
+  {c:"純資産",b:"b-pink",t:"新株発行。1,000株を@500円で発行し、全額資本金とした。払込金は当座預金。",d:[["当座預金","500,000"]],cr:[["資本金","500,000"]],h:"全額資本金が原則"},
+  {c:"純資産",b:"b-pink",t:"新株発行。500株を@600円で発行し、会社法に規定する最低額のみを資本金とした。",d:[["当座預金","300,000"]],cr:[["資本金","150,000"],["資本準備金","150,000"]],h:"払込額の1/2まで資本準備金とできる"},
+  {c:"純資産",b:"b-pink",t:"剰余金の配当を行う。繰越利益剰余金から500,000円を配当（株主総会決議）。資本金1,000,000円、資本準備金80,000円、利益準備金30,000円。準備金積立額を計算せよ。",d:[["繰越利益剰余金","550,000"]],cr:[["未払配当金","500,000"],["利益準備金","50,000"]],h:"配当の1/10と資本金1/4−準備金合計のいずれか低い方"},
+  {c:"純資産",b:"b-pink",t:"ストック・オプション。当期勤務分の費用50,000円を計上。",d:[["株式報酬費用","50,000"]],cr:[["新株予約権","50,000"]],h:"勤務期間で費用配分"},
+  {c:"純資産",b:"b-pink",t:"新株予約権が行使された。新株予約権簿価200,000円、行使価額300,000円、新株交付。全額資本金とする。",d:[["新株予約権","200,000"],["当座預金","300,000"]],cr:[["資本金","500,000"]],h:"権利行使価額＋新株予約権簿価＝払込資本"},
+  {c:"純資産",b:"b-pink",t:"新株予約権（簿価100,000円）が権利行使期間満了で失効。",d:[["新株予約権","100,000"]],cr:[["新株予約権戻入益","100,000"]],h:"特別利益"},
+  {c:"純資産",b:"b-pink",t:"分配可能額計算上の自己株式処分差損30,000円が生じた（その他資本剰余金マイナス）。期末にマイナスを利益剰余金で補填する仕訳を示せ（その他資本剰余金が△30,000円のとき）。",d:[["繰越利益剰余金","30,000"]],cr:[["その他資本剰余金","30,000"]],h:"会計年度末に補填"},
+  {c:"純資産",b:"b-pink",t:"本店から支店へ商品（原価100,000円）を125,000円で送付した（内部利益25%）。本店の仕訳を示せ。",d:[["支店","125,000"]],cr:[["支店へ売上","125,000"]],h:"内部取引、本店側"},
+  {c:"純資産",b:"b-pink",t:"上問の支店側の仕訳を示せ。",d:[["本店より仕入","125,000"]],cr:[["本店","125,000"]],h:"対照勘定"},
+  {c:"純資産",b:"b-pink",t:"本支店合併財務諸表作成時の内部利益控除。期末支店在庫のうち本店仕入分80,000円（うち内部利益16,000円）。",d:[["繰延内部利益控除","16,000"]],cr:[["繰延内部利益","16,000"]],h:"未実現利益消去"},
+  {c:"純資産",b:"b-pink",t:"在外支店の財務諸表換算。資産（現金・売掛金）合計$5,000を期末相場@112円、固定資産$2,000を取得時相場@105円、資本$3,000を本店勘定の円貨額（315,000円）として、為替差損益を計上せよ。仕訳は在外支店レポートの完了処理として、為替差損益が貸方に生じた場合のみ示せ（差額は貸方135,000円とする）。",d:[["（換算後諸資産）","770,000"]],cr:[["（本店）","315,000"],["（換算後諸負債等）","320,000"],["為替差益","135,000"]],h:"在外支店は円換算の差額を損益処理"},
+  {c:"純資産",b:"b-pink",t:"工事契約。工事収益総額10,000,000円、工事原価総額7,000,000円、当期発生原価2,800,000円。工事進行基準による当期収益認識仕訳。",d:[["契約資産","4,000,000"]],cr:[["完成工事高","4,000,000"]],h:"進捗度40%×10,000,000"},
+  {c:"純資産",b:"b-pink",t:"上問の当期工事原価2,800,000円を計上（材料費1,500,000円・労務費800,000円・外注費500,000円、いずれも未払）。",d:[["完成工事原価","2,800,000"]],cr:[["材料費","1,500,000"],["未払労務費","800,000"],["未払外注費","500,000"]],h:"未払を分けて計上"},
+  {c:"純資産",b:"b-pink",t:"前期に計上した契約資産1,000,000円について、当期に対価請求権が確定し売掛金に振替えた。",d:[["売掛金","1,000,000"]],cr:[["契約資産","1,000,000"]],h:"無条件の対価請求権の発生"},
+  {c:"純資産",b:"b-pink",t:"商品500,000円を返品権付きで販売した。過去実績から10%の返品が予想される。代金は掛け。",d:[["売掛金","500,000"]],cr:[["売上","450,000"],["返金負債","50,000"]],h:"返品見込分は売上から除く"},
+  {c:"純資産",b:"b-pink",t:"上問の販売原価率60%。商品原価の振替仕訳を示せ。",d:[["売上原価","270,000"],["返品資産","30,000"]],cr:[["商品","300,000"]],h:"返品見込分は返品資産"},
+  {c:"純資産",b:"b-pink",t:"複数の履行義務。商品（独立販売価格80,000円）と1年保証サービス（独立販売価格20,000円）を一括販売価格90,000円（現金受取）で販売。取引価格を配分せよ。",d:[["現金","90,000"]],cr:[["売上","72,000"],["契約負債","18,000"]],h:"80:20で配分（72,000:18,000）"}
+];
+
+const cats = ["全て","有価証券","連結","棚卸資産","固定資産","引当金","税効果","外貨建","リース","純資産"];
+let currentCat = "全て";
+let currentPage = 1;
+const perPage = 10;
+let opened = new Set();
+
+function getFiltered() {
+  return currentCat === "全て" ? Q : Q.filter(q => q.c === currentCat);
+}
+
+function renderCats() {
+  document.getElementById('cat-row').innerHTML = cats.map(c => 
+    `<button class="cat-btn ${c===currentCat?'active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function setCat(c) {
+  currentCat = c;
+  currentPage = 1;
+  renderCats();
+  render();
+}
+
+function fmtSide(arr) {
+  return arr.map(x => `<div class="shiwake-line"><span class="acc">${x[0]}</span><span class="amt">${x[1]}</span></div>`).join('');
+}
+
+function render() {
+  const filtered = getFiltered();
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / perPage));
+  if (currentPage > pages) currentPage = pages;
+  const start = (currentPage - 1) * perPage;
+  const slice = filtered.slice(start, start + perPage);
+
+  document.getElementById('s-total').textContent = Q.length;
+  document.getElementById('s-show').textContent = slice.length;
+  document.getElementById('s-done').textContent = opened.size;
+  document.getElementById('prog-text').textContent = `${opened.size} / ${Q.length}`;
+  document.getElementById('prog-fill').style.width = (opened.size / Q.length * 100) + '%';
+  document.getElementById('page-ind').textContent = `${currentPage} / ${pages}`;
+  document.getElementById('prev-btn').disabled = currentPage <= 1;
+  document.getElementById('next-btn').disabled = currentPage >= pages;
+
+  document.getElementById('q-list').innerHTML = slice.map((q, i) => {
+    const idx = Q.indexOf(q);
+    const id = 'q' + idx;
+    const isOpen = opened.has(id);
+    return `
+      <div class="q-card ${isOpen?'open':''}" onclick="toggleQ('${id}')">
+        <div class="q-meta">
+          <span class="q-num">Q${idx+1}</span>
+          <span class="badge ${q.b}">${q.c}</span>
+        </div>
+        <div class="q-text">${q.t}</div>
+        <div class="q-answer">
+          <div class="shiwake">
+            <div class="shiwake-side">
+              <div class="shiwake-label debit-label">借方</div>
+              ${fmtSide(q.d)}
+            </div>
+            <div class="shiwake-side">
+              <div class="shiwake-label credit-label">貸方</div>
+              ${fmtSide(q.cr)}
+            </div>
+          </div>
+          ${q.h?`<div class="q-hint">💡 ${q.h}</div>`:''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleQ(id) {
+  if (opened.has(id)) opened.delete(id);
+  else opened.add(id);
+  render();
+}
+
+function goPage(d) {
+  if (typeof d === 'number' && Math.abs(d) === 1) {
+    currentPage += d;
+  } else {
+    currentPage = d;
+  }
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  render();
+}
+
+function revealPage() {
+  const filtered = getFiltered();
+  const start = (currentPage - 1) * perPage;
+  const slice = filtered.slice(start, start + perPage);
+  slice.forEach(q => opened.add('q' + Q.indexOf(q)));
+  render();
+}
+
+function hidePage() {
+  const filtered = getFiltered();
+  const start = (currentPage - 1) * perPage;
+  const slice = filtered.slice(start, start + perPage);
+  slice.forEach(q => opened.delete('q' + Q.indexOf(q)));
+  render();
+}
+
+renderCats();
+render();
+</script>
+</body>
+</html>
