@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>本支店会計ドリル｜簿記論</title>
+<style>
+  :root{
+    --paper:#f7f5f0;
+    --ink:#1a2236;
+    --ink-soft:#54607a;
+    --line:#d9d4c7;
+    --accent:#b5762a;
+    --accent-soft:#f0e3cf;
+    --ok:#1f6b4a;
+    --ok-soft:#dcefe4;
+    --ng:#b23b3b;
+    --ng-soft:#f3dede;
+    --card:#fffdf8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;
+    min-height:100vh;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 96px;}
+
+  header{padding:22px 0 14px;border-bottom:2px solid var(--ink);}
+  .eyebrow{font-size:11px;letter-spacing:.28em;color:var(--accent);font-weight:700;margin:0 0 4px;}
+  h1{font-size:23px;margin:0;letter-spacing:.04em;font-weight:800;}
+  .sub{font-size:12px;color:var(--ink-soft);margin:6px 0 0;}
+
+  .scorebar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:14px;font-size:13px;
+  }
+  .progress-track{flex:1;height:6px;background:var(--line);border-radius:99px;margin:0 12px;overflow:hidden;}
+  .progress-fill{height:100%;width:0;background:var(--accent);transition:width .35s ease;}
+  .score-num{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;}
+
+  .cats{margin-top:20px;}
+  .cats-title{font-size:12px;letter-spacing:.2em;color:var(--ink-soft);margin:0 0 10px;font-weight:700;}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cat{
+    border:1.5px solid var(--line);background:var(--card);border-radius:12px;
+    padding:13px 12px;text-align:left;cursor:pointer;transition:.15s;
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .cat:active{transform:scale(.98);}
+  .cat.on{border-color:var(--ink);background:var(--accent-soft);}
+  .cat .nm{font-weight:700;font-size:14px;}
+  .cat .ct{font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .cat.wide{grid-column:1 / -1;}
+  .start{
+    margin-top:16px;width:100%;border:none;border-radius:12px;
+    background:var(--ink);color:#fff;font-size:16px;font-weight:700;
+    padding:15px;cursor:pointer;letter-spacing:.05em;
+  }
+  .start:active{opacity:.88;}
+  .start:disabled{background:var(--line);color:#fff;}
+
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px;}
+  .q-tag{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--accent);
+    border:1px solid var(--accent);border-radius:99px;padding:3px 10px;}
+  .q-count{font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .card{
+    background:var(--card);border:1.5px solid var(--line);border-radius:16px;
+    padding:18px 16px;box-shadow:0 1px 0 var(--line);
+  }
+  .q-text{font-size:15.5px;font-weight:600;margin:0 0 4px;}
+  .q-given{
+    font-size:13.5px;color:var(--ink-soft);margin:10px 0 0;
+    border-left:3px solid var(--accent-soft);padding:2px 0 2px 11px;
+    white-space:pre-line;
+  }
+
+  .opts{margin-top:16px;display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    border:1.5px solid var(--line);background:#fff;border-radius:12px;
+    padding:13px 14px;text-align:left;cursor:pointer;font-size:14.5px;
+    display:flex;gap:10px;align-items:flex-start;transition:.12s;line-height:1.5;
+  }
+  .opt:active{transform:scale(.99);}
+  .opt .mk{
+    flex:0 0 22px;height:22px;border-radius:6px;border:1.5px solid var(--line);
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);margin-top:1px;
+  }
+  .opt.correct{border-color:var(--ok);background:var(--ok-soft);}
+  .opt.correct .mk{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .opt.wrong{border-color:var(--ng);background:var(--ng-soft);}
+  .opt.wrong .mk{background:var(--ng);border-color:var(--ng);color:#fff;}
+  .opt.dim{opacity:.5;}
+  .opt:disabled{cursor:default;}
+  .jnl{font-variant-numeric:tabular-nums;}
+  .jnl b{font-weight:700;}
+
+  .explain{
+    margin-top:14px;border-radius:12px;padding:14px;font-size:13.5px;
+    background:var(--accent-soft);border:1px solid #e3d2b4;display:none;
+  }
+  .explain.show{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .explain .head{font-weight:800;font-size:13px;letter-spacing:.06em;margin:0 0 6px;
+    display:flex;align-items:center;gap:7px;}
+  .explain .dot{width:8px;height:8px;border-radius:99px;background:var(--accent);}
+  .explain p{margin:0;white-space:pre-line;}
+
+  .next{
+    margin-top:16px;width:100%;border:none;border-radius:12px;
+    background:var(--accent);color:#fff;font-size:16px;font-weight:700;
+    padding:15px;cursor:pointer;display:none;letter-spacing:.05em;
+  }
+  .next.show{display:block;}
+  .next:active{opacity:.88;}
+
+  .result{text-align:center;padding:30px 0 10px;}
+  .result .big{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+  .result .big small{font-size:22px;color:var(--ink-soft);font-weight:600;}
+  .result .msg{font-size:15px;margin:6px 0 0;color:var(--ink-soft);}
+  .result .pct{font-size:13px;color:var(--accent);font-weight:700;margin-top:4px;}
+  .again{
+    margin-top:22px;width:100%;border:1.5px solid var(--ink);background:transparent;
+    border-radius:12px;color:var(--ink);font-size:15px;font-weight:700;padding:14px;cursor:pointer;
+  }
+  .footnote{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:24px;line-height:1.7;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">税理士試験・簿記論</p>
+    <h1>本支店会計ドリル</h1>
+    <p class="sub">未達取引・内部利益・合併集計を、すきま時間で反復。</p>
+  </header>
+
+  <section id="home">
+    <div class="cats">
+      <p class="cats-title">出題範囲を選ぶ（複数可）</p>
+      <div class="cat-grid" id="catGrid"></div>
+      <button class="start" id="startBtn">スタート</button>
+    </div>
+    <p class="footnote">
+      全問4択。タップで即採点＆解説。<br>
+      金額の単位は千円。送付価格は各問の指示どおり原価に利益を加算済み。
+    </p>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="scorebar">
+      <span class="score-num" id="scoreNum">0 / 0</span>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <span class="score-num" id="remain"></span>
+    </div>
+    <div class="q-meta">
+      <span class="q-tag" id="qTag">未達</span>
+      <span class="q-count" id="qCount"></span>
+    </div>
+    <div class="card">
+      <p class="q-text" id="qText"></p>
+      <div class="q-given" id="qGiven"></div>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain">
+        <p class="head"><span class="dot"></span>解説</p>
+        <p id="explainText"></p>
+      </div>
+    </div>
+    <button class="next" id="nextBtn">次の問題 →</button>
+  </section>
+
+  <section id="done" class="hidden">
+    <div class="result">
+      <div class="big" id="finalScore"></div>
+      <p class="pct" id="finalPct"></p>
+      <p class="msg" id="finalMsg"></p>
+    </div>
+    <button class="again" id="againBtn">範囲を選び直す</button>
+  </section>
+</div>
+
+<script>
+const BANK = [
+  /* ---------- 未達取引の仕訳 ---------- */
+  { cat:"miatatsu", tag:"未達",
+    q:"本店から支店へ商品（振替価格110千円）を発送したが、支店に未達である。",
+    sub:"支店が行うべき整理仕訳は？（送付は原価＋利益で振替済み）",
+    type:"jnl",
+    opts:[
+      {d:"本店仕入",da:110,c:"本店",ca:110},
+      {d:"仕入",da:110,c:"本店",ca:110},
+      {d:"本店",da:110,c:"本店仕入",ca:110},
+      {d:"本店仕入",da:110,c:"買掛金",ca:110},
+    ], ans:0,
+    ex:"商品の到着を待っている側＝支店が記帳する。受け取った商品は『本店仕入』、相手は内部勘定の『本店』。\n(借)本店仕入 110 ／(貸)本店 110"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"支店から本店へ現金300千円を送金したが、本店に未達である。",
+    sub:"本店が行うべき整理仕訳は？",
+    type:"jnl",
+    opts:[
+      {d:"現金預金",da:300,c:"支店",ca:300},
+      {d:"支店",da:300,c:"現金預金",ca:300},
+      {d:"現金預金",da:300,c:"本店",ca:300},
+      {d:"現金預金",da:300,c:"売上",ca:300},
+    ], ans:0,
+    ex:"送金を受け取る本店がまだ記帳していない。現金が増え、相手は内部勘定『支店』。\n(借)現金預金 300 ／(貸)支店 300"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"本店が支店の営業費120千円を立替払いしたが、支店に未達である。",
+    sub:"支店が行うべき整理仕訳は？",
+    type:"jnl",
+    opts:[
+      {d:"営業費",da:120,c:"本店",ca:120},
+      {d:"本店",da:120,c:"営業費",ca:120},
+      {d:"営業費",da:120,c:"現金預金",ca:120},
+      {d:"営業費",da:120,c:"支店",ca:120},
+    ], ans:0,
+    ex:"支店の費用を本店が払ったが、支店が知らない。支店で費用『営業費』を計上し、相手は『本店』。\n(借)営業費 120 ／(貸)本店 120"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"支店が本店の売掛金1,500千円を回収したが、本店に未達である。",
+    sub:"本店が行うべき整理仕訳は？",
+    type:"jnl",
+    opts:[
+      {d:"支店",da:1500,c:"売掛金",ca:1500},
+      {d:"現金預金",da:1500,c:"売掛金",ca:1500},
+      {d:"売掛金",da:1500,c:"支店",ca:1500},
+      {d:"支店",da:1500,c:"売上",ca:1500},
+    ], ans:0,
+    ex:"本店の売掛金を支店が回収。現金は支店にあるので本店の借方は『支店』、本店の売掛金が消える。\n(借)支店 1,500 ／(貸)売掛金 1,500"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"本店が支店の売掛金300千円を回収したが、支店に未達である。",
+    sub:"支店が行うべき整理仕訳は？（前問の鏡像）",
+    type:"jnl",
+    opts:[
+      {d:"本店",da:300,c:"売掛金",ca:300},
+      {d:"支店",da:300,c:"売掛金",ca:300},
+      {d:"現金預金",da:300,c:"売掛金",ca:300},
+      {d:"売掛金",da:300,c:"本店",ca:300},
+    ], ans:0,
+    ex:"支店の売掛金を本店が回収。現金は本店にあるので支店の借方は『本店』、支店の売掛金が消える。\n(借)本店 300 ／(貸)売掛金 300"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"支店が本店の営業費100千円を支払ったが、本店に未達である。",
+    sub:"本店が行うべき整理仕訳は？",
+    type:"jnl",
+    opts:[
+      {d:"営業費",da:100,c:"支店",ca:100},
+      {d:"営業費",da:100,c:"本店",ca:100},
+      {d:"支店",da:100,c:"営業費",ca:100},
+      {d:"営業費",da:100,c:"現金預金",ca:100},
+    ], ans:0,
+    ex:"本店の費用を支店が払った。本店で費用『営業費』を計上、現金は支店なので相手は『支店』。これで支店勘定が100減る。\n(借)営業費 100 ／(貸)支店 100"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"未達取引の整理仕訳は、どちらの帳簿で行うか。",
+    sub:"基本ルールの確認。",
+    type:"mc",
+    opts:["まだ記帳していない側（未達となっている側）の帳簿","本店側で必ず行う","支店側で必ず行う","本店・支店の両方で行う"],
+    ans:0,
+    ex:"未達取引は『取引はあったがまだ記帳していない側』が行う。設問の『〜に未達』の〜が記帳する側。両方で行うと二重計上になる。"
+  },
+  { cat:"miatatsu", tag:"未達",
+    q:"すべての未達取引を整理した後、本店帳簿の支店勘定と支店帳簿の本店勘定はどうなるか。",
+    sub:"検算ポイント。",
+    type:"mc",
+    opts:["貸借逆で必ず一致する","一致しないこともある","残高はゼロになる","支店勘定が必ず大きくなる"],
+    ans:0,
+    ex:"支店勘定と本店勘定は表裏一体。未達整理後は必ず同額（貸借逆）で一致する。一致しなければ仕訳ミス＝最良の検算。合併B/S上は両者を相殺消去する。"
+  },
+
+  /* ---------- 内部利益の計算 ---------- */
+  { cat:"naibu", tag:"内部利益",
+    q:"本店は仕入原価の15%増で支店へ送付している。期末商品のうち本店からの仕入分が253千円含まれている。",
+    sub:"この商品に含まれる内部利益はいくらか。",
+    type:"mc",
+    opts:["33千円","38千円","220千円","253千円"],
+    ans:0,
+    ex:"振替価格は原価×1.15。内部利益＝振替価格×0.15/1.15。\n253×15/115＝33千円。\n誤答38は253×0.15（÷1.15忘れ）、220は原価。"
+  },
+  { cat:"naibu", tag:"内部利益",
+    q:"本店は仕入原価の15%増で送付。支店の期首商品のうち本店仕入分が667千円。",
+    sub:"含まれる内部利益はいくらか。",
+    type:"mc",
+    opts:["87千円","100千円","580千円","667千円"],
+    ans:0,
+    ex:"667×15/115＝87千円（原価580＋利益87）。\n期首分は『繰延内部利益戻入』として当期の利益に戻し入れる。"
+  },
+  { cat:"naibu", tag:"内部利益",
+    q:"本店は仕入原価の10%増で送付。期末商品の本店仕入分が825千円。",
+    sub:"含まれる内部利益はいくらか。",
+    type:"mc",
+    opts:["75千円","83千円","750千円","825千円"],
+    ans:0,
+    ex:"825×10/110＝75千円。10%増のときの内部利益率は10/110＝1/11。\n誤答83は825×0.1。"
+  },
+  { cat:"naibu", tag:"内部利益",
+    q:"本店は仕入原価の10%増で送付。期末商品の本店仕入分が1,650千円。",
+    sub:"含まれる内部利益はいくらか。",
+    type:"mc",
+    opts:["150千円","165千円","1,500千円","1,650千円"],
+    ans:0,
+    ex:"1,650×10/110＝150千円（原価1,500＋利益150）。"
+  },
+  { cat:"naibu", tag:"内部利益",
+    q:"原価に10%加算して送付しているとき、振替価格に占める内部利益の割合は？",
+    sub:"率の意味を確認。",
+    type:"mc",
+    opts:["10/110（約9.09%）","10%","11%","1/10"],
+    ans:0,
+    ex:"原価100→振替110。利益10は『振替価格110』に対して10/110。『原価に対して10%』と『振替価格に対して10/110』を取り違えないこと。"
+  },
+  { cat:"naibu", tag:"内部利益",
+    q:"合併損益計算書を作る際、支店の期末商品に含まれる本店からの内部利益はどう扱うか。",
+    sub:"考え方の確認。",
+    type:"mc",
+    opts:["控除する（外部未実現のため）","期末商品に加算する","そのまま計上する","全額を費用処理する"],
+    ans:0,
+    ex:"内部利益は会社内部で付けた利益で、外部にまだ売れていない＝未実現。合併上は期末商品から控除して消す。期首分は前期に控除済みのため戻し入れる。"
+  },
+
+  /* ---------- 合併財務諸表の集計 ---------- */
+  { cat:"gappei", tag:"合併",
+    q:"本店の外部売上35,000、支店の外部売上42,500、本店から支店への内部売上（支店売上）22,000。",
+    sub:"本支店合併損益計算書の売上高はいくらか。",
+    type:"mc",
+    opts:["77,500千円","99,500千円","55,500千円","100,000千円"],
+    ans:0,
+    ex:"合併上は外部への売上だけ。35,000＋42,500＝77,500。\n内部売上22,000は本店仕入と相殺され、損益には残らない。"
+  },
+  { cat:"gappei", tag:"合併",
+    q:"合併整理で相殺消去される内部取引の組み合わせは？",
+    sub:"対応関係の確認。",
+    type:"mc",
+    opts:["支店売上 と 本店仕入","売上 と 仕入","支店 と 本店仕入","売掛金 と 買掛金"],
+    ans:0,
+    ex:"本店が計上した『支店売上』と、支店が計上した『本店仕入（本店からの仕入）』は同じ内部取引の表裏。未達整理後は同額になり相殺消去される。"
+  },
+  { cat:"gappei", tag:"合併",
+    q:"本支店合併貸借対照表を作るとき、本店帳簿の『支店』勘定と支店帳簿の『本店』勘定はどうするか。",
+    sub:"B/S上の処理。",
+    type:"mc",
+    opts:["相殺消去する","合算してそのまま計上する","支店勘定だけ資産計上する","本店勘定だけ負債計上する"],
+    ans:0,
+    ex:"支店勘定・本店勘定は会社内部の貸借で、外部に対する資産・負債ではない。未達整理後は一致しているので相殺消去し、合併B/Sには残さない。"
+  },
+  { cat:"gappei", tag:"合併",
+    q:"期首商品に含まれる内部利益（繰延内部利益）90千円があった。合併P/Lでこれはどう影響するか。",
+    sub:"期首分の扱い。",
+    type:"mc",
+    opts:["前期に控除した利益なので当期に戻し入れ、利益を増やす","当期も控除して利益を減らす","売上高から差し引く","期末商品に加算する"],
+    ans:0,
+    ex:"期首商品の内部利益は前期末に控除済み。当期に外部へ売れて実現するので戻し入れる。当期は期末分を新たに控除。差引『期末内部利益−期首内部利益』が純利益への影響。"
+  },
+
+  /* ---------- 在外支店・工場会計 ---------- */
+  { cat:"ouyou", tag:"応用",
+    q:"在外支店（ドル建）の換算で、本店からの仕入（本店仕入）に適用する為替相場は？",
+    sub:"在外支店の換算ルール。",
+    type:"mc",
+    opts:["本店が発送した時の為替相場（本店仕入時のレート）","決算時の為替相場","期中平均相場","支店設立時の相場"],
+    ans:0,
+    ex:"本店仕入は本支店間取引なので、本店側の発送額（円）に合わせる＝本店仕入時のレートで換算。これにより本店の支店売上（円）と一致し相殺できる。"
+  },
+  { cat:"ouyou", tag:"応用",
+    q:"在外支店の換算で、売上高や営業費（収益・費用）に通常用いる相場は？",
+    sub:"期中項目の換算。",
+    type:"mc",
+    opts:["期中平均相場","決算時の相場","取得時の相場","発送時の相場"],
+    ans:0,
+    ex:"収益・費用は原則として期中平均相場（または発生時相場）で換算。資産・負債は決算時相場、本店勘定は本店の支店勘定額に合わせる。"
+  },
+  { cat:"ouyou", tag:"応用",
+    q:"工場会計で、工場が完成品を本社へ送付する取引に用いる勘定の組み合わせは？",
+    sub:"本社工場間の振替。",
+    type:"mc",
+    opts:["工場：本社へ売上／本社：工場より仕入","工場：売上／本社：仕入","工場：製品／本社：本社","工場：本社／本社：工場"],
+    ans:0,
+    ex:"本支店会計と同じ構造。送り出す工場は『本社へ売上』、受け取る本社は『工場より仕入』で内部取引を計上。合併時にこの両者と内部利益を消去する。"
+  },
+  { cat:"ouyou", tag:"応用",
+    q:"工場が本社へ製品を送付し内部利益を加算している。本社の期末製品（工場仕入分）に内部利益13,200千円が含まれる。合併上この内部利益は？",
+    sub:"工場会計の内部利益。",
+    type:"mc",
+    opts:["控除する（未実現のため）","加算する","売上原価に振り替える","そのまま残す"],
+    ans:0,
+    ex:"本支店会計の内部利益控除と同じ。本社に在庫として残る製品の内部利益は外部未実現なので控除する。"
+  },
+];
+
+const CATS = [
+  {id:"miatatsu", nm:"未達取引の仕訳"},
+  {id:"naibu",    nm:"内部利益の計算"},
+  {id:"gappei",   nm:"合併F/Sの集計"},
+  {id:"ouyou",    nm:"在外支店・工場"},
+];
+
+const selected = new Set(CATS.map(c=>c.id));
+let queue=[], idx=0, correct=0, answered=false;
+
+const $ = id=>document.getElementById(id);
+const homeEl=$("home"), quizEl=$("quiz"), doneEl=$("done");
+
+function renderCats(){
+  const grid=$("catGrid"); grid.innerHTML="";
+  CATS.forEach(c=>{
+    const n=BANK.filter(b=>b.cat===c.id).length;
+    const el=document.createElement("button");
+    el.className="cat"+(selected.has(c.id)?" on":"");
+    el.innerHTML='<span class="nm">'+c.nm+'</span><span class="ct">'+n+'問</span>';
+    el.onclick=()=>{ selected.has(c.id)?selected.delete(c.id):selected.add(c.id); renderCats(); updateStart(); };
+    grid.appendChild(el);
+  });
+}
+function updateStart(){
+  const total=BANK.filter(b=>selected.has(b.cat)).length;
+  const btn=$("startBtn");
+  btn.disabled=selected.size===0;
+  btn.textContent=selected.size===0?"範囲を1つ以上選んでください":"スタート（"+total+"問）";
+}
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function start(){
+  queue=shuffle(BANK.filter(b=>selected.has(b.cat)));
+  idx=0; correct=0;
+  homeEl.classList.add("hidden"); doneEl.classList.add("hidden");
+  quizEl.classList.remove("hidden");
+  renderQ();
+}
+
+function jnlHTML(o){
+  return '<span class="jnl">(借)'+o.d+' <b>'+o.da.toLocaleString()+'</b> ／ (貸)'+o.c+' <b>'+o.ca.toLocaleString()+'</b></span>';
+}
+
+function renderQ(){
+  answered=false;
+  const q=queue[idx];
+  $("qTag").textContent=q.tag;
+  $("qCount").textContent="第 "+(idx+1)+" 問 / 全 "+queue.length+" 問";
+  $("qText").textContent=q.q;
+  $("qGiven").textContent=q.sub||"";
+  $("qGiven").style.display=q.sub?"block":"none";
+  $("scoreNum").textContent=correct+" / "+idx;
+  $("remain").textContent="残 "+(queue.length-idx-1);
+  $("progFill").style.width=((idx/queue.length)*100)+"%";
+
+  const wrap=$("opts"); wrap.innerHTML="";
+  const order=shuffle(q.opts.map((_,i)=>i));
+  q._order=order;
+  order.forEach((origIdx,pos)=>{
+    const o=q.opts[origIdx];
+    const btn=document.createElement("button");
+    btn.className="opt";
+    const label=String.fromCharCode(65+pos);
+    const content = q.type==="jnl" ? jnlHTML(o) : "<span>"+o+"</span>";
+    btn.innerHTML='<span class="mk">'+label+'</span>'+content;
+    btn.onclick=()=>pick(pos,origIdx);
+    wrap.appendChild(btn);
+  });
+
+  $("explain").classList.remove("show");
+  $("nextBtn").classList.remove("show");
+}
+
+function pick(pos,origIdx){
+  if(answered) return;
+  answered=true;
+  const q=queue[idx];
+  if(origIdx===q.ans) correct++;
+
+  const btns=$("opts").querySelectorAll(".opt");
+  q._order.forEach((oi,p)=>{
+    const b=btns[p];
+    b.disabled=true;
+    if(oi===q.ans) b.classList.add("correct");
+    else if(p===pos) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+
+  $("explainText").textContent=q.ex;
+  $("explain").classList.add("show");
+  $("scoreNum").textContent=correct+" / "+(idx+1);
+  $("progFill").style.width=(((idx+1)/queue.length)*100)+"%";
+
+  const nb=$("nextBtn");
+  nb.textContent = (idx+1<queue.length) ? "次の問題 →" : "結果を見る →";
+  nb.classList.add("show");
+}
+
+function next(){
+  idx++;
+  if(idx<queue.length){ renderQ(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else finish();
+}
+
+function finish(){
+  quizEl.classList.add("hidden");
+  doneEl.classList.remove("hidden");
+  const pct=Math.round(correct/queue.length*100);
+  $("finalScore").innerHTML=correct+'<small> / '+queue.length+'</small>';
+  $("finalPct").textContent="正答率 "+pct+"%";
+  let msg;
+  if(pct===100) msg="満点。仕訳と内部利益の処理が安定しています。";
+  else if(pct>=80) msg="十分な水準。間違えた論点だけ復習を。";
+  else if(pct>=50) msg="基礎は入っています。未達の『どちらが記帳』を固めましょう。";
+  else msg="まず未達取引の仕訳パターンを反復から。";
+  $("finalMsg").textContent=msg;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+$("startBtn").onclick=start;
+$("nextBtn").onclick=next;
+$("againBtn").onclick=()=>{ doneEl.classList.add("hidden"); homeEl.classList.remove("hidden"); renderCats(); updateStart(); };
+
+renderCats(); updateStart();
+</script>
+</body>
+</html>
