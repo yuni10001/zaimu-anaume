@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>決算整理ドリル｜簿記論</title>
+<style>
+  :root{
+    --paper:#f6f6f2;
+    --ink:#16202e;
+    --ink-soft:#52617a;
+    --line:#d4d8df;
+    --accent:#345b9c;
+    --accent-soft:#dde6f4;
+    --ok:#1f6b4a;
+    --ok-soft:#dcefe4;
+    --ng:#b23b3b;
+    --ng-soft:#f3dede;
+    --card:#fffefb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;min-height:100vh;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 96px;}
+
+  header{padding:22px 0 14px;border-bottom:2px solid var(--ink);}
+  .eyebrow{font-size:11px;letter-spacing:.28em;color:var(--accent);font-weight:700;margin:0 0 4px;}
+  h1{font-size:23px;margin:0;letter-spacing:.04em;font-weight:800;}
+  .sub{font-size:12px;color:var(--ink-soft);margin:6px 0 0;}
+
+  .scorebar{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:13px;}
+  .progress-track{flex:1;height:6px;background:var(--line);border-radius:99px;margin:0 12px;overflow:hidden;}
+  .progress-fill{height:100%;width:0;background:var(--accent);transition:width .35s ease;}
+  .score-num{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;}
+
+  .cats{margin-top:20px;}
+  .cats-title{font-size:12px;letter-spacing:.2em;color:var(--ink-soft);margin:0 0 10px;font-weight:700;}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cat{border:1.5px solid var(--line);background:var(--card);border-radius:12px;
+    padding:13px 12px;text-align:left;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:3px;}
+  .cat:active{transform:scale(.98);}
+  .cat.on{border-color:var(--ink);background:var(--accent-soft);}
+  .cat .nm{font-weight:700;font-size:14px;}
+  .cat .ct{font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .start{margin-top:16px;width:100%;border:none;border-radius:12px;background:var(--ink);color:#fff;
+    font-size:16px;font-weight:700;padding:15px;cursor:pointer;letter-spacing:.05em;}
+  .start:active{opacity:.88;}
+  .start:disabled{background:var(--line);color:#fff;}
+
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px;}
+  .q-tag{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--accent);
+    border:1px solid var(--accent);border-radius:99px;padding:3px 10px;}
+  .q-count{font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;
+    padding:18px 16px;box-shadow:0 1px 0 var(--line);}
+  .q-text{font-size:15.5px;font-weight:600;margin:0 0 4px;white-space:pre-line;}
+  .q-given{font-size:13.5px;color:var(--ink-soft);margin:10px 0 0;
+    border-left:3px solid var(--accent-soft);padding:2px 0 2px 11px;white-space:pre-line;}
+
+  .opts{margin-top:16px;display:flex;flex-direction:column;gap:9px;}
+  .opt{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 14px;
+    text-align:left;cursor:pointer;font-size:14.5px;display:flex;gap:10px;align-items:flex-start;transition:.12s;line-height:1.5;}
+  .opt:active{transform:scale(.99);}
+  .opt .mk{flex:0 0 22px;height:22px;border-radius:6px;border:1.5px solid var(--line);
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);margin-top:1px;}
+  .opt.correct{border-color:var(--ok);background:var(--ok-soft);}
+  .opt.correct .mk{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .opt.wrong{border-color:var(--ng);background:var(--ng-soft);}
+  .opt.wrong .mk{background:var(--ng);border-color:var(--ng);color:#fff;}
+  .opt.dim{opacity:.5;}
+  .opt:disabled{cursor:default;}
+
+  .explain{margin-top:14px;border-radius:12px;padding:14px;font-size:13.5px;
+    background:var(--accent-soft);border:1px solid #c5d4ec;display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .explain .head{font-weight:800;font-size:13px;letter-spacing:.06em;margin:0 0 6px;display:flex;align-items:center;gap:7px;}
+  .explain .dot{width:8px;height:8px;border-radius:99px;background:var(--accent);}
+  .explain p{margin:0;white-space:pre-line;}
+
+  .next{margin-top:16px;width:100%;border:none;border-radius:12px;background:var(--accent);color:#fff;
+    font-size:16px;font-weight:700;padding:15px;cursor:pointer;display:none;letter-spacing:.05em;}
+  .next.show{display:block;}
+  .next:active{opacity:.88;}
+
+  .result{text-align:center;padding:30px 0 10px;}
+  .result .big{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+  .result .big small{font-size:22px;color:var(--ink-soft);font-weight:600;}
+  .result .msg{font-size:15px;margin:6px 0 0;color:var(--ink-soft);}
+  .result .pct{font-size:13px;color:var(--accent);font-weight:700;margin-top:4px;}
+  .again{margin-top:22px;width:100%;border:1.5px solid var(--ink);background:transparent;border-radius:12px;
+    color:var(--ink);font-size:15px;font-weight:700;padding:14px;cursor:pointer;}
+  .footnote{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:24px;line-height:1.7;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">税理士試験・簿記論</p>
+    <h1>決算整理ドリル</h1>
+    <p class="sub">棚卸・有価証券・減価償却・貸倒引当金の基礎処理を反復。</p>
+  </header>
+
+  <section id="home">
+    <div class="cats">
+      <p class="cats-title">出題範囲を選ぶ（複数可）</p>
+      <div class="cat-grid" id="catGrid"></div>
+      <button class="start" id="startBtn">スタート</button>
+    </div>
+    <p class="footnote">
+      全問4択。タップで即採点＆解説。<br>
+      金額・数量の単位は各問に明記。標準的な処理に絞って出題。
+    </p>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="scorebar">
+      <span class="score-num" id="scoreNum">0 / 0</span>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <span class="score-num" id="remain"></span>
+    </div>
+    <div class="q-meta">
+      <span class="q-tag" id="qTag"></span>
+      <span class="q-count" id="qCount"></span>
+    </div>
+    <div class="card">
+      <p class="q-text" id="qText"></p>
+      <div class="q-given" id="qGiven"></div>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain">
+        <p class="head"><span class="dot"></span>解説</p>
+        <p id="explainText"></p>
+      </div>
+    </div>
+    <button class="next" id="nextBtn">次の問題 →</button>
+  </section>
+
+  <section id="done" class="hidden">
+    <div class="result">
+      <div class="big" id="finalScore"></div>
+      <p class="pct" id="finalPct"></p>
+      <p class="msg" id="finalMsg"></p>
+    </div>
+    <button class="again" id="againBtn">範囲を選び直す</button>
+  </section>
+</div>
+
+<script>
+const BANK = [
+  /* ===== 棚卸資産の評価 ===== */
+  { cat:"tana", tag:"棚卸評価",
+    q:"帳簿棚卸数量2,000個（原価＠500円）、実地棚卸数量1,950個、正味売却価額＠460円。",
+    sub:"棚卸減耗損はいくらか。",
+    opts:["25,000円","23,000円","2,000円","20,000円"], ans:0,
+    ex:"棚卸減耗損＝（帳簿2,000−実地1,950）×原価500＝50個×500＝25,000円。\n数量差には必ず『原価』を掛ける（時価ではない）。"
+  },
+  { cat:"tana", tag:"棚卸評価",
+    q:"帳簿棚卸数量2,000個（原価＠500円）、実地棚卸数量1,950個、正味売却価額＠460円。",
+    sub:"商品評価損はいくらか。",
+    opts:["78,000円","80,000円","25,000円","18,000円"], ans:0,
+    ex:"商品評価損＝実地1,950個×（原価500−正味売却価額460）＝1,950×40＝78,000円。\n誤答80,000は帳簿2,000個で計算したもの。評価損は『実地数量』に対して計算する。"
+  },
+  { cat:"tana", tag:"棚卸評価",
+    q:"帳簿棚卸数量2,000個（原価＠500円）、実地棚卸数量1,950個、正味売却価額＠460円。",
+    sub:"貸借対照表に計上される商品の金額は？",
+    opts:["897,000円","975,000円","920,000円","1,000,000円"], ans:0,
+    ex:"B/S商品＝実地1,950個×正味売却価額460＝897,000円。\n検算：帳簿1,000,000−減耗25,000−評価損78,000＝897,000。\n975,000は評価損引き忘れ、1,000,000は帳簿原価そのまま。"
+  },
+  { cat:"tana", tag:"棚卸評価",
+    q:"棚卸減耗損と商品評価損を計算するとき、商品評価損は何個に対して計算するか。",
+    sub:"計算順序の確認。",
+    opts:["実地棚卸数量","帳簿棚卸数量","帳簿と実地の差","当期販売数量"], ans:0,
+    ex:"まず数量差（帳簿−実地）で棚卸減耗損、次に手元に実在する実地数量に単価の下落分を掛けて商品評価損。だから評価損は実地数量がベース。"
+  },
+  { cat:"tana", tag:"棚卸評価",
+    q:"通常生じる程度（原価性あり）の棚卸減耗損は、損益計算書のどこに表示するか。",
+    sub:"表示区分。",
+    opts:["売上原価（または販売費）","特別損失","営業外費用","計上しない"], ans:0,
+    ex:"原価性あり（毎期通常発生する程度）→売上原価または販売費。\n原価性なし（異常な減耗）→営業外費用または特別損失。"
+  },
+  { cat:"tana", tag:"棚卸評価",
+    q:"収益性の低下による商品評価損の、原則的な表示区分は？",
+    sub:"表示区分。",
+    opts:["売上原価","販売費及び一般管理費","営業外費用","純資産直入"], ans:0,
+    ex:"商品評価損は原則として売上原価に表示。ただし臨時かつ多額のときは特別損失とすることもある。"
+  },
+
+  /* ===== 有価証券 ===== */
+  { cat:"yuka", tag:"有価証券",
+    q:"売買目的有価証券の期末評価と、評価差額の処理は？",
+    sub:"区分ごとの評価。",
+    opts:["時価評価し、評価差額は当期の損益（P/L）","取得原価のまま据え置く","時価評価し、差額は純資産","償却原価法で評価する"], ans:0,
+    ex:"売買目的は時価評価。差額は『有価証券評価損益』として当期の損益に計上する。"
+  },
+  { cat:"yuka", tag:"有価証券",
+    q:"その他有価証券を全部純資産直入法で評価したときの評価差額は、どこに計上するか。",
+    sub:"区分ごとの評価。",
+    opts:["純資産の部（その他有価証券評価差額金）","営業外損益","特別損益","売上原価"], ans:0,
+    ex:"その他有価証券は時価評価するが、評価差額は損益にせず純資産に直入（全部純資産直入法）。税効果を加味する場合は差額に税効果を控除して計上。"
+  },
+  { cat:"yuka", tag:"有価証券",
+    q:"子会社株式・関連会社株式の期末評価は？",
+    sub:"区分ごとの評価。",
+    opts:["取得原価で評価（時価評価しない）","時価評価しP/L","時価評価し純資産","償却原価法"], ans:0,
+    ex:"支配・影響力の行使が目的なので、時価評価せず取得原価のまま。"
+  },
+  { cat:"yuka", tag:"有価証券",
+    q:"満期保有目的の債券で、額面と取得価額の差額が金利の調整と認められるとき適用する方法は？",
+    sub:"区分ごとの評価。",
+    opts:["償却原価法","時価評価","低価法","取得原価で据置"], ans:0,
+    ex:"金利調整差額は償却原価法（定額法または利息法）で取得原価に加減し、満期に向けて額面に近づける。"
+  },
+  { cat:"yuka", tag:"有価証券",
+    q:"額面1,000千円の社債を×1年4/1に940千円で取得（満期保有目的、償還まで5年、定額法）。",
+    sub:"当期（×2年3/31）の償却額はいくらか。",
+    opts:["12千円","60千円","6千円","20千円"], ans:0,
+    ex:"金利調整差額＝1,000−940＝60千円。定額法なので60÷5年＝12千円が毎期の償却額。"
+  },
+  { cat:"yuka", tag:"有価証券",
+    q:"額面1,000千円の社債を×1年4/1に940千円で取得（満期保有目的、償還まで5年、定額法）。",
+    sub:"当期末の帳簿価額はいくらか。",
+    opts:["952千円","940千円","1,000千円","928千円"], ans:0,
+    ex:"取得940＋当期償却12＝952千円。満期（5年後）に額面1,000となるよう毎期12ずつ加算していく。"
+  },
+  { cat:"yuka", tag:"有価証券",
+    q:"帳簿価額500千円の売買目的有価証券、期末時価560千円。期末の評価処理は？",
+    sub:"評価差額の方向。",
+    opts:["評価益60千円を当期の損益に計上","評価損60千円を計上","純資産に60千円計上","評価しない"], ans:0,
+    ex:"時価560＞簿価500なので評価益60千円。売買目的の差額はP/L（有価証券評価損益）。"
+  },
+
+  /* ===== 減価償却 ===== */
+  { cat:"genka", tag:"減価償却",
+    q:"取得原価1,000千円、残存価額ゼロ、耐用年数8年、定額法。当期償却費は？",
+    sub:"定額法（残存ゼロ）。",
+    opts:["125千円","112.5千円","100千円","160千円"], ans:0,
+    ex:"定額法＝（取得原価−残存価額）÷耐用年数＝1,000÷8＝125千円。"
+  },
+  { cat:"genka", tag:"減価償却",
+    q:"取得原価1,000千円、残存価額は取得原価の10%、耐用年数5年、定額法。年償却費は？",
+    sub:"定額法（残存10%）。",
+    opts:["180千円","200千円","90千円","100千円"], ans:0,
+    ex:"残存＝1,000×10%＝100。（1,000−100）÷5＝900÷5＝180千円。\n誤答200は残存を引き忘れたもの。"
+  },
+  { cat:"genka", tag:"減価償却",
+    q:"取得原価2,000千円、耐用年数5年、200%定率法、当期首に取得。1年目の償却費は？",
+    sub:"200%定率法。",
+    opts:["800千円","400千円","500千円","720千円"], ans:0,
+    ex:"償却率＝（1÷5）×2＝0.4。1年目＝期首帳簿価額2,000×0.4＝800千円。"
+  },
+  { cat:"genka", tag:"減価償却",
+    q:"取得原価2,000千円、耐用年数5年、200%定率法（償却率0.4）。2年目の償却費は？",
+    sub:"200%定率法（2年目）。",
+    opts:["480千円","800千円","400千円","320千円"], ans:0,
+    ex:"2年目の期首帳簿価額＝2,000−800＝1,200。1,200×0.4＝480千円。定率法は期首簿価に率を掛けるので毎期逓減する。"
+  },
+  { cat:"genka", tag:"減価償却",
+    q:"定率法では、各期の減価償却費は時の経過とともにどうなるか。",
+    sub:"定額法との違い。",
+    opts:["逓減する（初期が大きく後期が小さい）","毎期一定","逓増する","一定ではないがランダム"], ans:0,
+    ex:"定率法は『期首帳簿価額×償却率』。帳簿価額が減るほど償却費も減るので逓減する。定額法は毎期一定。"
+  },
+  { cat:"genka", tag:"減価償却",
+    q:"3月決算の会社が×1年10月1日に固定資産を取得した。当期の償却費は年償却費の何か月分か。",
+    sub:"期中取得の月割。",
+    opts:["6か月分","12か月分","3か月分","計上しない"], ans:0,
+    ex:"10月〜翌3月の6か月を月割で計上する（年償却費×6/12）。"
+  },
+
+  /* ===== 貸倒引当金 ===== */
+  { cat:"kashidaore", tag:"貸倒引当金",
+    q:"期末売掛金10,000千円、貸倒実績率2%、差額補充法。決算整理前の貸倒引当金残高150千円。当期繰入額は？",
+    sub:"一般債権・差額補充法。",
+    opts:["50千円","200千円","350千円","150千円"], ans:0,
+    ex:"設定すべき額＝10,000×2%＝200千円。差額補充法なので繰入＝200−前T/B残高150＝50千円。"
+  },
+  { cat:"kashidaore", tag:"貸倒引当金",
+    q:"同じ条件（設定額200千円、前期設定額150千円）を洗替法で処理する場合、当期の繰入額は？",
+    sub:"洗替法。",
+    opts:["200千円","50千円","150千円","350千円"], ans:0,
+    ex:"洗替法は前期設定額150を全額『戻入』し、当期設定額200を全額『繰入』する。よって繰入額は200千円（純額の損益影響は差額補充法と同じ50千円）。"
+  },
+  { cat:"kashidaore", tag:"貸倒引当金",
+    q:"差額補充法における『当期繰入額』とは何か。",
+    sub:"用語の確認。",
+    opts:["設定すべき額と決算整理前残高との差額","設定すべき額の全額","期末債権の全額","前期設定額の全額"], ans:0,
+    ex:"差額補充法は、必要な設定額に対して不足分だけを補う。だから繰入額＝設定額−前T/B残高。"
+  },
+  { cat:"kashidaore", tag:"貸倒引当金",
+    q:"経営破綻には至っていないが、債務の弁済に重大な問題が生じる可能性が高い債務者に対する債権の区分は？",
+    sub:"債権の3区分。",
+    opts:["貸倒懸念債権","一般債権","破産更生債権等","不渡債権"], ans:0,
+    ex:"一般債権→貸倒懸念債権→破産更生債権等の3区分。懸念債権は財務内容評価法またはキャッシュ・フロー見積法で見積もる。"
+  },
+  { cat:"kashidaore", tag:"貸倒引当金",
+    q:"破産更生債権等について、財務内容評価法で貸倒見積高はどう計算するか。",
+    sub:"破産更生債権等。",
+    opts:["債権額から担保・保証による回収見込額を控除した残額の全額","債権額×貸倒実績率","将来CFを割り引いた額との差額","債権額の50%"], ans:0,
+    ex:"回収がほぼ見込めないため、担保・保証で回収できる分を除いた残額の全額を貸倒見積高とする。"
+  },
+  { cat:"kashidaore", tag:"貸倒引当金",
+    q:"キャッシュ・フロー見積法で貸倒見積高を求める方法は？",
+    sub:"CF見積法。",
+    opts:["当初の約定利子率で割り引いた将来CFの現在価値と、債権の帳簿価額との差額","将来CFの単純合計と帳簿価額との差額","担保処分見込額を控除した残額","債権額×貸倒実績率"], ans:0,
+    ex:"将来キャッシュ・フローを『当初の約定利子率』で割り引いた現在価値を求め、帳簿価額との差額を貸倒見積高とする。条件変更後も割引率は当初の率を使う点が要注意。"
+  },
+];
+
+const CATS = [
+  {id:"tana",       nm:"棚卸資産の評価"},
+  {id:"yuka",       nm:"有価証券"},
+  {id:"genka",      nm:"減価償却"},
+  {id:"kashidaore", nm:"貸倒引当金"},
+];
+
+const selected = new Set(CATS.map(c=>c.id));
+let queue=[], idx=0, correct=0, answered=false;
+const $ = id=>document.getElementById(id);
+const homeEl=$("home"), quizEl=$("quiz"), doneEl=$("done");
+
+function renderCats(){
+  const grid=$("catGrid"); grid.innerHTML="";
+  CATS.forEach(c=>{
+    const n=BANK.filter(b=>b.cat===c.id).length;
+    const el=document.createElement("button");
+    el.className="cat"+(selected.has(c.id)?" on":"");
+    el.innerHTML='<span class="nm">'+c.nm+'</span><span class="ct">'+n+'問</span>';
+    el.onclick=()=>{ selected.has(c.id)?selected.delete(c.id):selected.add(c.id); renderCats(); updateStart(); };
+    grid.appendChild(el);
+  });
+}
+function updateStart(){
+  const total=BANK.filter(b=>selected.has(b.cat)).length;
+  const btn=$("startBtn");
+  btn.disabled=selected.size===0;
+  btn.textContent=selected.size===0?"範囲を1つ以上選んでください":"スタート（"+total+"問）";
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function start(){
+  queue=shuffle(BANK.filter(b=>selected.has(b.cat)));
+  idx=0; correct=0;
+  homeEl.classList.add("hidden"); doneEl.classList.add("hidden");
+  quizEl.classList.remove("hidden");
+  renderQ();
+}
+function renderQ(){
+  answered=false;
+  const q=queue[idx];
+  $("qTag").textContent=q.tag;
+  $("qCount").textContent="第 "+(idx+1)+" 問 / 全 "+queue.length+" 問";
+  $("qText").textContent=q.q;
+  $("qGiven").textContent=q.sub||"";
+  $("qGiven").style.display=q.sub?"block":"none";
+  $("scoreNum").textContent=correct+" / "+idx;
+  $("remain").textContent="残 "+(queue.length-idx-1);
+  $("progFill").style.width=((idx/queue.length)*100)+"%";
+
+  const wrap=$("opts"); wrap.innerHTML="";
+  const order=shuffle(q.opts.map((_,i)=>i));
+  q._order=order;
+  order.forEach((origIdx,pos)=>{
+    const btn=document.createElement("button");
+    btn.className="opt";
+    const label=String.fromCharCode(65+pos);
+    btn.innerHTML='<span class="mk">'+label+'</span><span>'+q.opts[origIdx]+'</span>';
+    btn.onclick=()=>pick(pos,origIdx);
+    wrap.appendChild(btn);
+  });
+  $("explain").classList.remove("show");
+  $("nextBtn").classList.remove("show");
+}
+function pick(pos,origIdx){
+  if(answered) return;
+  answered=true;
+  const q=queue[idx];
+  if(origIdx===q.ans) correct++;
+  const btns=$("opts").querySelectorAll(".opt");
+  q._order.forEach((oi,p)=>{
+    const b=btns[p]; b.disabled=true;
+    if(oi===q.ans) b.classList.add("correct");
+    else if(p===pos) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  $("explainText").textContent=q.ex;
+  $("explain").classList.add("show");
+  $("scoreNum").textContent=correct+" / "+(idx+1);
+  $("progFill").style.width=(((idx+1)/queue.length)*100)+"%";
+  const nb=$("nextBtn");
+  nb.textContent = (idx+1<queue.length) ? "次の問題 →" : "結果を見る →";
+  nb.classList.add("show");
+}
+function next(){
+  idx++;
+  if(idx<queue.length){ renderQ(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else finish();
+}
+function finish(){
+  quizEl.classList.add("hidden");
+  doneEl.classList.remove("hidden");
+  const pct=Math.round(correct/queue.length*100);
+  $("finalScore").innerHTML=correct+'<small> / '+queue.length+'</small>';
+  $("finalPct").textContent="正答率 "+pct+"%";
+  let msg;
+  if(pct===100) msg="満点。基礎処理が固まっています。";
+  else if(pct>=80) msg="十分な水準。間違えた論点だけ復習を。";
+  else if(pct>=50) msg="あと一歩。計算と表示区分を切り分けて確認を。";
+  else msg="まず各論点の計算式から固めましょう。";
+  $("finalMsg").textContent=msg;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("startBtn").onclick=start;
+$("nextBtn").onclick=next;
+$("againBtn").onclick=()=>{ doneEl.classList.add("hidden"); homeEl.classList.remove("hidden"); renderCats(); updateStart(); };
+renderCats(); updateStart();
+</script>
+</body>
+</html>
