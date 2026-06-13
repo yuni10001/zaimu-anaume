@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>総合問題ドリル｜簿記論</title>
+<style>
+  :root{
+    --paper:#f6f5f3;
+    --ink:#1c1a2a;
+    --ink-soft:#5b5870;
+    --line:#d7d4dd;
+    --accent:#5b4b9c;
+    --accent-soft:#e6e1f3;
+    --ok:#1f6b4a;
+    --ok-soft:#dcefe4;
+    --ng:#b23b3b;
+    --ng-soft:#f3dede;
+    --card:#fffefb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 96px;}
+
+  header{padding:22px 0 14px;border-bottom:2px solid var(--ink);}
+  .eyebrow{font-size:11px;letter-spacing:.28em;color:var(--accent);font-weight:700;margin:0 0 4px;}
+  h1{font-size:23px;margin:0;letter-spacing:.04em;font-weight:800;}
+  .sub{font-size:12px;color:var(--ink-soft);margin:6px 0 0;}
+
+  .scorebar{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:13px;}
+  .progress-track{flex:1;height:6px;background:var(--line);border-radius:99px;margin:0 12px;overflow:hidden;}
+  .progress-fill{height:100%;width:0;background:var(--accent);transition:width .35s ease;}
+  .score-num{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;}
+
+  .cats{margin-top:20px;}
+  .cats-title{font-size:12px;letter-spacing:.2em;color:var(--ink-soft);margin:0 0 10px;font-weight:700;}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cat{border:1.5px solid var(--line);background:var(--card);border-radius:12px;
+    padding:13px 12px;text-align:left;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:3px;}
+  .cat:active{transform:scale(.98);}
+  .cat.on{border-color:var(--ink);background:var(--accent-soft);}
+  .cat.wide{grid-column:1 / -1;}
+  .cat .nm{font-weight:700;font-size:14px;}
+  .cat .ct{font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .start{margin-top:16px;width:100%;border:none;border-radius:12px;background:var(--ink);color:#fff;
+    font-size:16px;font-weight:700;padding:15px;cursor:pointer;letter-spacing:.05em;}
+  .start:active{opacity:.88;}
+  .start:disabled{background:var(--line);color:#fff;}
+
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px;}
+  .q-tag{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--accent);
+    border:1px solid var(--accent);border-radius:99px;padding:3px 10px;}
+  .q-count{font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;
+    padding:18px 16px;box-shadow:0 1px 0 var(--line);}
+  .q-text{font-size:15.5px;font-weight:600;margin:0 0 4px;white-space:pre-line;}
+  .q-given{font-size:13.5px;color:var(--ink-soft);margin:10px 0 0;
+    border-left:3px solid var(--accent-soft);padding:2px 0 2px 11px;white-space:pre-line;}
+
+  .opts{margin-top:16px;display:flex;flex-direction:column;gap:9px;}
+  .opt{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 14px;
+    text-align:left;cursor:pointer;font-size:14.5px;display:flex;gap:10px;align-items:flex-start;transition:.12s;line-height:1.5;}
+  .opt:active{transform:scale(.99);}
+  .opt .mk{flex:0 0 22px;height:22px;border-radius:6px;border:1.5px solid var(--line);
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);margin-top:1px;}
+  .opt.correct{border-color:var(--ok);background:var(--ok-soft);}
+  .opt.correct .mk{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .opt.wrong{border-color:var(--ng);background:var(--ng-soft);}
+  .opt.wrong .mk{background:var(--ng);border-color:var(--ng);color:#fff;}
+  .opt.dim{opacity:.5;}
+  .opt:disabled{cursor:default;}
+  .jnl{font-variant-numeric:tabular-nums;}
+  .jnl b{font-weight:700;}
+
+  .explain{margin-top:14px;border-radius:12px;padding:14px;font-size:13.5px;
+    background:var(--accent-soft);border:1px solid #cdc4ea;display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .explain .head{font-weight:800;font-size:13px;letter-spacing:.06em;margin:0 0 6px;display:flex;align-items:center;gap:7px;}
+  .explain .dot{width:8px;height:8px;border-radius:99px;background:var(--accent);}
+  .explain p{margin:0;white-space:pre-line;}
+
+  .next{margin-top:16px;width:100%;border:none;border-radius:12px;background:var(--accent);color:#fff;
+    font-size:16px;font-weight:700;padding:15px;cursor:pointer;display:none;letter-spacing:.05em;}
+  .next.show{display:block;}
+  .next:active{opacity:.88;}
+
+  .result{text-align:center;padding:30px 0 10px;}
+  .result .big{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+  .result .big small{font-size:22px;color:var(--ink-soft);font-weight:600;}
+  .result .msg{font-size:15px;margin:6px 0 0;color:var(--ink-soft);}
+  .result .pct{font-size:13px;color:var(--accent);font-weight:700;margin-top:4px;}
+  .again{margin-top:22px;width:100%;border:1.5px solid var(--ink);background:transparent;border-radius:12px;
+    color:var(--ink);font-size:15px;font-weight:700;padding:14px;cursor:pointer;}
+  .footnote{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:24px;line-height:1.7;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">税理士試験・簿記論｜一般総合(8)</p>
+    <h1>総合問題ドリル</h1>
+    <p class="sub">60分・43箇所の決算整理を分解。拾う・捨てるの判断を鍛える。</p>
+  </header>
+
+  <section id="home">
+    <div class="cats">
+      <p class="cats-title">出題範囲を選ぶ（複数可）</p>
+      <div class="cat-grid" id="catGrid"></div>
+      <button class="start" id="startBtn">スタート</button>
+    </div>
+    <p class="footnote">
+      全問4択。タップで即採点＆解説。金額の単位は円。<br>
+      数値は解答（215〜223ページ）と突き合わせて検算済み。
+    </p>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="scorebar">
+      <span class="score-num" id="scoreNum">0 / 0</span>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <span class="score-num" id="remain"></span>
+    </div>
+    <div class="q-meta">
+      <span class="q-tag" id="qTag"></span>
+      <span class="q-count" id="qCount"></span>
+    </div>
+    <div class="card">
+      <p class="q-text" id="qText"></p>
+      <div class="q-given" id="qGiven"></div>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain">
+        <p class="head"><span class="dot"></span>解説</p>
+        <p id="explainText"></p>
+      </div>
+    </div>
+    <button class="next" id="nextBtn">次の問題 →</button>
+  </section>
+
+  <section id="done" class="hidden">
+    <div class="result">
+      <div class="big" id="finalScore"></div>
+      <p class="pct" id="finalPct"></p>
+      <p class="msg" id="finalMsg"></p>
+    </div>
+    <button class="again" id="againBtn">範囲を選び直す</button>
+  </section>
+</div>
+
+<script>
+const BANK = [
+  /* ===== 拾える論点（易〜標準） ===== */
+  { cat:"hiroeru", tag:"拾える",
+    q:"小口現金の3月使用報告189,200円（税込）が未処理だった。",
+    sub:"営業費に振り替える額（税抜）はいくらか。",
+    opts:["172,000円","189,200円","17,200円","171,800円"], ans:0,
+    ex:"税込を税抜と消費税に分解。189,200×1/1.1＝172,000（営業費）、189,200×0.1/1.1＝17,200（仮払消費税等）。税抜方式なので必ず分ける。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"上記の使用報告（189,200円）を処理した後、決算整理後の現金有高は？（前T/B現金200,000円）",
+    sub:"差額を拾うだけの易しい論点。",
+    opts:["10,800円","27,200円","200,000円","28,000円"], ans:0,
+    ex:"報告漏れの使用額を現金から減らすだけ。200,000−189,200＝10,800円。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"買掛金決済のため振り出した小切手1,650,000円が、相手が受取に来ず金庫に保管されていた（未渡小切手）。",
+    sub:"必要な修正仕訳は？",
+    type:"jnl",
+    opts:[
+      {d:"当座預金",da:1650000,c:"買掛金",ca:1650000},
+      {d:"買掛金",da:1650000,c:"当座預金",ca:1650000},
+      {d:"当座預金",da:1650000,c:"現金",ca:1650000},
+      {d:"営業費",da:1650000,c:"当座預金",ca:1650000},
+    ], ans:0,
+    ex:"未渡小切手はまだ当座から出ていない。当座預金を元に戻し、決済したはずの買掛金を復活させる。(借)当座預金/(貸)買掛金。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"銀行勘定調整で、時間外預入や未取付小切手について企業側が行う修正は？",
+    sub:"見分けると時間短縮になる。",
+    opts:["仕訳不要（銀行側で調整される）","当座を増やす","当座を減らす","現金へ振り替える"], ans:0,
+    ex:"時間外預入・未取付小切手は銀行側で自動的に調整される項目。企業の帳簿修正は不要。一方、未渡小切手・誤記帳・不渡手形は企業側の修正が必要。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"得意先T社が破産を申し立てた。T社に対する手持手形9,350,000円と取立依頼手形3,520,000円を破産更生債権等へ振り替える。",
+    sub:"振替額はいくらか。",
+    opts:["12,870,000円","9,350,000円","18,370,000円","15,510,000円"], ans:0,
+    ex:"手持9,350,000＋取立依頼3,520,000＝12,870,000円。割引手形6,160,000は買い戻して別途処理するので、ここには含めない。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"翌期夏期賞与（支給対象×20年12月〜×21年5月）の支給見込額は39,000,000円。3月決算の当期に帰属する賞与引当金繰入額は？",
+    sub:"月割で按分するだけ。",
+    opts:["26,000,000円","39,000,000円","19,500,000円","13,000,000円"], ans:0,
+    ex:"対象6か月のうち当期は12月〜3月の4か月。39,000,000×4/6＝26,000,000円。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"受取配当金が源泉所得税等60,000円控除後（540,000円）で計上されていた。総額に修正後、後T/Bの受取配当金は？",
+    sub:"総額主義への修正。",
+    opts:["600,000円","540,000円","480,000円","660,000円"], ans:0,
+    ex:"源泉徴収前の総額に直す。540,000＋60,000＝600,000円。源泉60,000は仮払金とし、法人税等の納付額から控除する。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"営業費に見越額81,000円がある。見越（未払）計上の仕訳は？",
+    sub:"見越・繰延の方向。",
+    type:"jnl",
+    opts:[
+      {d:"営業費",da:81000,c:"未払費用",ca:81000},
+      {d:"未払費用",da:81000,c:"営業費",ca:81000},
+      {d:"前払費用",da:81000,c:"営業費",ca:81000},
+      {d:"営業費",da:81000,c:"前払費用",ca:81000},
+    ], ans:0,
+    ex:"見越＝当期の費用をまだ払っていない分の計上。(借)営業費/(貸)未払費用。繰延は逆に(借)前払費用/(貸)営業費。"
+  },
+  { cat:"hiroeru", tag:"拾える",
+    q:"仮受消費税等125,740,650円、仮払消費税等94,908,050円、中間納付額9,000,000円。未払消費税等は？",
+    sub:"差額で求める定番。",
+    opts:["21,832,600円","30,832,600円","12,832,600円","22,832,600円"], ans:0,
+    ex:"仮受−仮払−中間納付＝未払。125,740,650−94,908,050−9,000,000＝21,832,600円。中間納付は仮払金に計上されている。"
+  },
+
+  /* ===== 時間のかかる大物 ===== */
+  { cat:"oomono", tag:"大物",
+    q:"小売売上120,000,000円に対し1,200,000ポイントを付与。1ポイントの独立販売価格0.90円、使用見込率90%。",
+    sub:"契約負債に配分する額は？（円未満四捨五入）",
+    opts:["1,070,367円","1,080,000円","1,200,000円","1,058,824円"], ans:0,
+    ex:"ポイントの独立販売価格＝1,200,000×0.90＝1,080,000。取引価格を商品とポイントに按分。\nポイント分＝120,000,000×1,080,000/(120,000,000＋1,080,000)＝1,070,367円。小売売上を減らし契約負債へ。"
+  },
+  { cat:"oomono", tag:"大物",
+    q:"上記で契約負債1,070,367円を計上。当期に使用されたポイントは200,000ポイントだった。",
+    sub:"収益（小売売上）に振り替える額は？（円未満四捨五入）",
+    opts:["198,216円","200,000円","180,000円","216,000円"], ans:0,
+    ex:"使用ポイント÷総見込ポイント＝1,070,367×200,000/1,080,000＝198,216円。契約負債を取り崩して小売売上を計上。"
+  },
+  { cat:"oomono", tag:"大物",
+    q:"A商品（総平均法）。期首27,102,000円(22,585個)＋当期仕入398,076,000円(311,015個)＋引取運賃162,000円。",
+    sub:"総平均単価はいくらか。",
+    opts:["@1,275円","@1,278円","@1,272円","@1,280円"], ans:0,
+    ex:"(27,102,000＋398,076,000＋162,000)÷(22,585＋311,015)＝425,340,000÷333,600＝@1,275円。引取運賃は仕入原価に算入する点に注意。"
+  },
+  { cat:"oomono", tag:"大物",
+    q:"B商品@9,740円。帳簿数量＝2,250＋誤記帳90＋配送中885＝3,225個、実地数量＝2,300＋配送中885＝3,185個。",
+    sub:"棚卸減耗費はいくらか。",
+    opts:["389,600円","487,000円","0円","779,200円"], ans:0,
+    ex:"数量差40個×原価@9,740＝389,600円。期末日に配送中（未着）の885個は売上を取り消して帳簿・実地の双方に含める点がポイント。"
+  },
+  { cat:"oomono", tag:"大物",
+    q:"倉庫2の改修費24,000,000円を建設仮勘定に計上。耐用年数が10年延長した（当初の残存年数10年）。",
+    sub:"資本的支出と修繕費（収益的支出）への振分けは？",
+    opts:[
+      "資本的支出12,000,000円・修繕費12,000,000円",
+      "全額24,000,000円を資本的支出",
+      "全額24,000,000円を修繕費",
+      "資本的支出16,000,000円・修繕費8,000,000円"
+    ], ans:0,
+    ex:"改修費を延長年数の割合で資本化。24,000,000×延長10/(当初残存10＋延長10)＝12,000,000を建物へ、残り12,000,000は修繕費。"
+  },
+  { cat:"oomono", tag:"大物",
+    q:"所有権移転外ファイナンス・リース。年額1,000,000円を毎年10/1前払、期間5年。割引率1.9%（4年の年金現価係数3.81699）、見積現金購入価額4,844,980円。",
+    sub:"リース資産の計上額は？",
+    opts:["4,816,990円","4,844,980円","4,727,170円","5,000,000円"], ans:0,
+    ex:"前払なので初回1,000,000は即時、残り4回を4年係数3.81699で割引。1,000,000＋1,000,000×3.81699＝4,816,990円。見積現金購入価額4,844,980より低いので4,816,990を採用。"
+  },
+  { cat:"oomono", tag:"大物",
+    q:"額面20,000,000円のうち4,000,000円を×20年12月31日に買入消却。前T/B社債は19,520,000円（償却原価）。",
+    sub:"消却した部分の社債帳簿価額は？",
+    opts:["3,904,000円","4,000,000円","3,840,000円","3,970,000円"], ans:0,
+    ex:"帳簿価額を額面割合で按分。19,520,000×4,000,000/20,000,000＝3,904,000円。これに経過利息（45,000）と当期償却額（24,000）を加味して買入消却損益を算定する。"
+  },
+
+  /* ===== 解く順番・捨て問の判断 ===== */
+  { cat:"triage", tag:"捨て問判断",
+    q:"本問は制限時間60分・解答箇所43。解答への道が示す最大のポイントは？",
+    sub:"全体戦略。",
+    opts:["難易度の低い論点を優先して確実に得点する","上から順に全部解き切る","難しい論点から先に片付ける","借方科目だけ埋める"], ans:0,
+    ex:"ボリューム型の総合問題。全部は解き切れない前提で、易しい論点を取りこぼさないことが合否を分ける。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"次のうち、短時間で確実に取れる（優先すべき）論点はどれか。",
+    sub:"優先順位の判断。",
+    opts:["T社債権の破産更生債権等への振替","商品の総平均＋減耗・評価損","リースの現在価値計算","社債の買入消却"], ans:0,
+    ex:"金額を拾って振り替えるだけの論点は短時間で確実に取れる。商品・リース・社債は工程が多く時間がかかるので後回し候補。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"次のうち、時間がかかり後回し・捨て問候補になりやすい論点はどれか。",
+    sub:"後回し判断。",
+    opts:["小売売上のポイント制度（契約負債）","現金（小口）の処理","営業費の見越・繰延","受取配当金の総額修正"], ans:0,
+    ex:"収益認識のポイント配分は、独立販売価格→取引価格の按分→使用分の取崩と工程が多い。配点1なら後回しが定石。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"商品（総平均法）が大物（時間がかかる論点）になる主な理由は？",
+    sub:"連鎖に注意。",
+    opts:["見本品・誤記帳・運送費で平均単価が動き、減耗・評価損まで連動するため","単に金額が大きいから","総平均法は計算が禁止されているから","期末商品の算定が不要だから"], ans:0,
+    ex:"平均単価の分子・分母に複数の修正が入り、それが期末商品→減耗・評価損→売上原価まで波及する。1か所のミスが連鎖するので、解くなら慎重に。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"法人税等（年税額・未払法人税等）は、解く順番として通常いつ手をつけるか。",
+    sub:"確定タイミング。",
+    opts:["最後（税引前利益が全論点の集計後に確定するため）","最初","売上の直後","固定資産と同時"], ans:0,
+    ex:"法人税等＝税引前利益×税率＋法人税等調整額。税引前利益は全整理後に決まるので最後。途中では確定できない。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"未払消費税等・未払法人税等・売上原価のように「差額で求める」科目の扱いとして適切なのは？",
+    sub:"差額科目の段取り。",
+    opts:["関連論点を終えてから最後に差額で埋める","最初に推定で埋める","必ず捨てる","借方合計から逆算だけする"], ans:0,
+    ex:"これらは他の数字が揃って初めて確定する。先に手をつけても確定しないので、関連処理を終えてからまとめて埋める。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"当座預金の銀行勘定調整で、企業側の修正が「不要」なものの組み合わせは？",
+    sub:"仕訳要否の切り分け。",
+    opts:["時間外預入 と 未取付小切手","未渡小切手 と 誤記帳","不渡手形 と 誤記帳","未渡小切手 と 時間外預入"], ans:0,
+    ex:"銀行側で調整される項目（時間外預入・未取付小切手）は企業仕訳不要。未渡小切手・誤記帳・不渡手形買戻は企業側の修正が必要。ここを即断できると時間が浮く。"
+  },
+  { cat:"triage", tag:"捨て問判断",
+    q:"限られた時間で1点でも多く取るための行動として、最も適切なのは？",
+    sub:"配点とのバランス。",
+    opts:["配点1の易しい論点を拾い、計算量の多い論点は後回しにする","難問を1つ完璧に仕上げる","借方だけ全部埋める","最初のページから順に完答を目指す"], ans:0,
+    ex:"配点は基本1点（一部2点）で均等。難問1問に時間をかけるより、易しい論点を複数取る方が期待得点が高い。"
+  },
+];
+
+const CATS = [
+  {id:"hiroeru", nm:"拾える論点"},
+  {id:"oomono",  nm:"時間のかかる大物"},
+  {id:"triage",  nm:"捨て問・解く順番", wide:true},
+];
+
+const selected = new Set(CATS.map(c=>c.id));
+let queue=[], idx=0, correct=0, answered=false;
+const $ = id=>document.getElementById(id);
+const homeEl=$("home"), quizEl=$("quiz"), doneEl=$("done");
+
+function renderCats(){
+  const grid=$("catGrid"); grid.innerHTML="";
+  CATS.forEach(c=>{
+    const n=BANK.filter(b=>b.cat===c.id).length;
+    const el=document.createElement("button");
+    el.className="cat"+(selected.has(c.id)?" on":"")+(c.wide?" wide":"");
+    el.innerHTML='<span class="nm">'+c.nm+'</span><span class="ct">'+n+'問</span>';
+    el.onclick=()=>{ selected.has(c.id)?selected.delete(c.id):selected.add(c.id); renderCats(); updateStart(); };
+    grid.appendChild(el);
+  });
+}
+function updateStart(){
+  const total=BANK.filter(b=>selected.has(b.cat)).length;
+  const btn=$("startBtn");
+  btn.disabled=selected.size===0;
+  btn.textContent=selected.size===0?"範囲を1つ以上選んでください":"スタート（"+total+"問）";
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function start(){
+  queue=shuffle(BANK.filter(b=>selected.has(b.cat)));
+  idx=0; correct=0;
+  homeEl.classList.add("hidden"); doneEl.classList.add("hidden");
+  quizEl.classList.remove("hidden");
+  renderQ();
+}
+function jnlHTML(o){
+  return '<span class="jnl">(借)'+o.d+' <b>'+o.da.toLocaleString()+'</b> ／ (貸)'+o.c+' <b>'+o.ca.toLocaleString()+'</b></span>';
+}
+function renderQ(){
+  answered=false;
+  const q=queue[idx];
+  $("qTag").textContent=q.tag;
+  $("qCount").textContent="第 "+(idx+1)+" 問 / 全 "+queue.length+" 問";
+  $("qText").textContent=q.q;
+  $("qGiven").textContent=q.sub||"";
+  $("qGiven").style.display=q.sub?"block":"none";
+  $("scoreNum").textContent=correct+" / "+idx;
+  $("remain").textContent="残 "+(queue.length-idx-1);
+  $("progFill").style.width=((idx/queue.length)*100)+"%";
+
+  const wrap=$("opts"); wrap.innerHTML="";
+  const order=shuffle(q.opts.map((_,i)=>i));
+  q._order=order;
+  order.forEach((origIdx,pos)=>{
+    const o=q.opts[origIdx];
+    const btn=document.createElement("button");
+    btn.className="opt";
+    const label=String.fromCharCode(65+pos);
+    const content = q.type==="jnl" ? jnlHTML(o) : "<span>"+o+"</span>";
+    btn.innerHTML='<span class="mk">'+label+'</span>'+content;
+    btn.onclick=()=>pick(pos,origIdx);
+    wrap.appendChild(btn);
+  });
+  $("explain").classList.remove("show");
+  $("nextBtn").classList.remove("show");
+}
+function pick(pos,origIdx){
+  if(answered) return;
+  answered=true;
+  const q=queue[idx];
+  if(origIdx===q.ans) correct++;
+  const btns=$("opts").querySelectorAll(".opt");
+  q._order.forEach((oi,p)=>{
+    const b=btns[p]; b.disabled=true;
+    if(oi===q.ans) b.classList.add("correct");
+    else if(p===pos) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  $("explainText").textContent=q.ex;
+  $("explain").classList.add("show");
+  $("scoreNum").textContent=correct+" / "+(idx+1);
+  $("progFill").style.width=(((idx+1)/queue.length)*100)+"%";
+  const nb=$("nextBtn");
+  nb.textContent = (idx+1<queue.length) ? "次の問題 →" : "結果を見る →";
+  nb.classList.add("show");
+}
+function next(){
+  idx++;
+  if(idx<queue.length){ renderQ(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else finish();
+}
+function finish(){
+  quizEl.classList.add("hidden");
+  doneEl.classList.remove("hidden");
+  const pct=Math.round(correct/queue.length*100);
+  $("finalScore").innerHTML=correct+'<small> / '+queue.length+'</small>';
+  $("finalPct").textContent="正答率 "+pct+"%";
+  let msg;
+  if(pct===100) msg="満点。拾う論点と捨てる論点の見極めができています。";
+  else if(pct>=80) msg="十分な水準。間違えた論点だけ復習を。";
+  else if(pct>=50) msg="拾える論点の取りこぼしを減らしましょう。";
+  else msg="まず『拾える論点』を確実にするところから。";
+  $("finalMsg").textContent=msg;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("startBtn").onclick=start;
+$("nextBtn").onclick=next;
+$("againBtn").onclick=()=>{ doneEl.classList.add("hidden"); homeEl.classList.remove("hidden"); renderCats(); updateStart(); };
+renderCats(); updateStart();
+</script>
+</body>
+</html>
